@@ -232,7 +232,7 @@ export default class TreeComponent extends Vue {
 
 #scrollable {
     overflow-y: scroll;
-    max-height: 70vh;
+    max-height: 60vh;
     width: 100%;
 }
 
