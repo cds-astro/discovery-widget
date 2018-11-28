@@ -117,7 +117,9 @@ export default class TreeComponent extends Vue {
     @Watch('tree')
     public changeTree(newTree: Tree, oldRoot: Tree) {
         // Find the node where the user is so that the tree does not cd to its root
-        const newRoot = newTree.find(this.root.ID);
+        const path = this.root.getPath();
+        console.log('PATH ROOT', path)
+        const newRoot = newTree.findNode(path);
         if (!isNullOrUndefined(newRoot)) {
             this.root = newRoot;
             this.$forceUpdate();

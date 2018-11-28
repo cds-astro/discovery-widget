@@ -56,6 +56,7 @@ type CatalogueType = HeaderDatasetType[];
 
 export class Tree {
     public children: Tree[];
+    public parent: Tree;
     public ID: string;
     public catalogs: Map<ID, Map<ID, HeaderDatasetType>>;
 
@@ -63,7 +64,7 @@ export class Tree {
     public catalogsToShow: Boolean[];
     public numberOfCatalogs: number;
     public inViewport: boolean;
-    constructor(ID: string) {
+    constructor(ID: string, parent: Tree) {
         this.children = [];
         this.ID = ID;
         this.catalogs = new Map<ID, Map<ID, HeaderDatasetType>>();
@@ -71,13 +72,45 @@ export class Tree {
         this.catalogsToShow = [];
         this.inViewport = false;
         this.numberOfCatalogs = 0;
+        this.parent = parent;
+    }
+
+    public getPath(): String[] {
+        let currentNode = this;
+        let path = [];
+        while(!isNullOrUndefined(currentNode)) {
+            path.push(currentNode.ID);
+            let nextNode = null;
+            nextNode = currentNode.parent;
+            currentNode = nextNode;
+        }
+        return path.reverse();
     }
 
     public findNode(path: String[]): Tree {
+        let currentNode = this;
+        console.log('FIND NODE: ', path);
+        while(path.length > 1) {
+            path = path.slice(1);
+            let nextNode = null;
+            for (let i = 0; i < currentNode.children.length; ++i) {
+                let child = currentNode.children[i];
+                if (child.ID === path[0]) {
+                    nextNode = child;
+                    break;
+                }
+            }
+            currentNode = nextNode;
+            if (isNullOrUndefined(currentNode)) {
+                break;
+            }
+        }
+        return currentNode;
+        /*
         if (this.ID === path[0]) {
             if (path.length === 1) {
                 return this;
-            } 
+            }
             const pathChild = path.slice(1);
             for (let i = 0; i < this.children.length; ++i) {
                 const child = this.children[i];
@@ -87,6 +120,7 @@ export class Tree {
                 }
             }
         }
+        */
     }
 
     public filter(tables: HeaderResponse[], tableToNode: Map<string, Tree>, tableToCat: Map<string, string>) {
@@ -213,7 +247,7 @@ export class Tree {
 
             let existingChild = this.getChild(id);
             if (isNull(existingChild)) {
-                existingChild = new Tree(id);
+                existingChild = new Tree(id, this);
                 this.children.push(existingChild);
             }
 
@@ -346,9 +380,9 @@ export default class WidgetComponent extends Vue {
     private scrollTop: number = 0;
     private positionPopup: number = 0;
 
-    private root: Tree = new Tree('');
+    private root: Tree = new Tree('', null);
 
-   public  mounted() {
+   public mounted() {
         console.log('Tree component MOUNTED'); 
         this.$root.$on('updateViewer', (args: any[]) => {
             const corners = args[0];
@@ -370,7 +404,7 @@ export default class WidgetComponent extends Vue {
         this.$root.$on('viewportTree', (tablesInViewport: HeaderResponse[]) => {
             console.log('Viewport tree triggered!');
             /* Shallow copy of root: the objects within root are copied as references */
-            const filteredRoot = new Tree(this.root.ID);
+            const filteredRoot = new Tree(this.root.ID, this.root.parent);
             filteredRoot.children = this.root.children;
             filteredRoot.catalogs = this.root.catalogs;
             filteredRoot.catalogsList = this.root.catalogsList;
@@ -395,7 +429,7 @@ export default class WidgetComponent extends Vue {
             console.log('Filter tree triggered!');
 
             /* Shallow copy of root: the objects within root are copied as references */
-            const filteredRoot = new Tree(this.root.ID);
+            const filteredRoot = new Tree(this.root.ID, this.root.parent);
             filteredRoot.children = this.root.children;
             filteredRoot.catalogs = this.root.catalogs;
             filteredRoot.catalogsList = this.root.catalogsList;
@@ -485,7 +519,6 @@ export default class WidgetComponent extends Vue {
             this.sliceBounds[1]
         );
     }
-
 }
 </script>
 <style>

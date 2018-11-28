@@ -258,7 +258,11 @@ figcaption p {
     float: right;   
 }
 
-li.regime {
+#header ul {
+    width: 100px;
+}
+
+#header ul li.regime {
     font-size: small;
     word-wrap: break-word;
 }
