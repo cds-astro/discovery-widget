@@ -6,16 +6,14 @@
         <p v-bind:style="{color: inViewport()}">{{ author() }}</p>
         <ul>
             <li class="table-component" v-for="i in tables.length"
-                v-if="tables[i-1].obs_title && tables[i-1].filtered">
+                v-if="tables[i-1].obs_title && tables[i-1].filtered"
+                v-on:mouseenter="showPopup(tables[i-1], $event.target)"
+                v-on:mouseleave="hidePopup">
                 <p v-if="tables[i-1].inViewport"
-                    v-on:mouseenter="showPopup(tables[i-1], $event.target.parentElement)"
-                    v-on:mouseleave="hidePopup"
                     :style="{color: 'green'}">
                     {{ tableName(i - 1) }}
                 </p>
                 <p v-else
-                    v-on:mouseenter="showPopup(tables[i-1], $event.target.parentElement)"
-                    v-on:mouseleave="hidePopup"
                     :style="{color: 'red'}">
                     {{ tableName(i - 1) }}
                 </p>
@@ -96,9 +94,11 @@ export default class CollectionComponent extends Vue {
     private showPopup(table: HeaderDatasetType, element: HTMLLIElement) {
         this.popup = true;
 
+        console.log('lement', element.style)
+
         this.$emit('toggle-popup', {
             header: table,
-            offsetTop: this.$el.offsetTop,
+            offsetTop: element.getBoundingClientRect().top,
             offsetHeight: this.$el.offsetHeight,
             element,
         });
@@ -148,18 +148,18 @@ export default class CollectionComponent extends Vue {
 
     private isVizierCatalog(): boolean {
         if (this.tables.length === 0) {
-            return Array.from(this.catalog.values())[0].dataproduct_type === 'catalog';
+            return !isNullOrUndefined(Array.from(this.catalog.values())[0].vizier_popularity);
         }
 
-        return this.tables[0].dataproduct_type === 'catalog';
+        return !isNullOrUndefined(this.tables[0].vizier_popularity);
     }
 }
 </script>
 
 <style>
 .table-component {
+    padding: 5px 0px;
     color: green;
-    padding: 2px;
     list-style-type: none;
     text-align: left;
     border-top: 0.2px solid white;
@@ -178,8 +178,13 @@ export default class CollectionComponent extends Vue {
     border: 1px solid darkgray;
 }
 
+#collection-component h4 {
+    text-align: center;
+}
+
 #collection-component h4, #collection-component p {
     margin: 2px;
+    word-wrap: break-word;
 }
 
 .table-component:hover {

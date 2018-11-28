@@ -14,14 +14,17 @@
                 </li>
             </ul>
         </div>
+
         <div id="content">
             <div id="title">
                 <h4>{{ record.obs_title }}</h4>
                 <a id="quit"><i class="fa fa-times fa-lg"></i></a>
             </div>
 
-            <div id="description"><p>{{ record.description }}</p></div>
+            <div v-if="record.description" id="description"><p>{{ record.description }}</p></div>
+            <div v-else id="description"><p>No description</p></div>
         </div>
+
         <!-- Check the type of the collection (i.e. image or catalog) -->
         <div id="bottombar" v-if="record.isImageType()">
             <div id="left">
@@ -38,7 +41,7 @@
                 <button v-if="record.data.moc_access_url" v-on:click="$root.$emit('addCoverage', record.data)"><p>Coverage</p></button>
             </div>
             <div id="right">
-                <a v-bind:href="record.obs_description_url" target='_blank'><button><p>Vizier</p></button></a>
+                <a v-if="record.isVizierCatalog()" v-bind:href="record.obs_description_url" target='_blank'><button><p>Vizier</p></button></a>
                 <a v-bind:href="record.propertiesFileUrl()" target='_blank'><button><p>Properties</p></button></a>
             </div>
         </div>
@@ -64,6 +67,7 @@ class Record {
     public obs_description_url: string = '';
     public bib_reference: string = '';
     public obs_regime: string[] = [];
+    public vizier_popularity: number;
 
     /* Only for vizier cats */
     public table_name: string = '';
@@ -80,6 +84,7 @@ class Record {
             this.obs_title = this.data.obs_title;
             this.id = this.data.ID;
             this.obs_description_url = this.data.obs_description_url;
+            this.vizier_popularity = this.data.vizier_popularity;
 
             if (!isNullOrUndefined(this.data.obs_regime)) {
                 if (this.data.obs_regime instanceof Array) {
@@ -94,7 +99,7 @@ class Record {
             console.log('GET RECORD:', data);
             if (this.isImageType()) {
                 this.previewURL = this.data.hips_service_url + '/preview.jpg';
-            } else {
+            } else if (this.isVizierCatalog()) {
                 this.previewURL = 'http://alasky.u-strasbg.fr/footprints/tables/vizier/' +
                     encodeURIComponent(this.data.obs_id.replace(/\//g, '_')) +
                     '/densityMap?format=png&size=small';
@@ -108,6 +113,10 @@ class Record {
 
     public isImageType() {
         return this.dataproduct_type === 'image';
+    }
+
+    public isVizierCatalog() {
+        return !isNullOrUndefined(this.vizier_popularity);
     }
 
     public propertiesFileUrl(): string {
@@ -167,7 +176,7 @@ export default class PopupComponent extends Vue {
     list-style-type: none;
     text-align: center;
     border: 1px solid black;
-    border-radius: 2px;
+    border-radius: 4px;
     width: 402px;
     padding: 5px;
 }
@@ -236,6 +245,11 @@ figcaption p {
     font-size:inherit;
 }
 
+#left, #right {
+    bottom: 100%;
+    margin-top: 10px;
+}
+
 #left {
     float: left;
 }
@@ -246,6 +260,7 @@ figcaption p {
 
 li.regime {
     font-size: small;
+    word-wrap: break-word;
 }
 
 #content #title {

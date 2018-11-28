@@ -3,7 +3,7 @@
 <template>
     <div id="tree-component">
         <PopupComponent ref="popupComponent"
-            v-show="showPopup"
+            v-show="showPopup && !popupOutOfBounds"
             v-bind:collection="collectionToShow"
             v-bind:viewport="viewport"
             v-on:exit="selectPopup=false"
@@ -112,6 +112,8 @@ export default class TreeComponent extends Vue {
     private collectionToShow: HeaderSelectionEvent = null;
     private scrollTop: number = 0;
     private positionPopup: number = 0;
+    private popupOutOfBounds: boolean = false;
+
     @Watch('tree')
     public changeTree(newTree: Tree, oldRoot: Tree) {
         // Find the node where the user is so that the tree does not cd to its root
@@ -140,20 +142,17 @@ export default class TreeComponent extends Vue {
     }
 
     private clickOnTable(event: any): boolean {
-        // Deselection occurs when the user clicks outside the tree.
-        const parentElement = event.target.parentElement;
+        let currentElement = event.target;
+        while (!isNullOrUndefined(currentElement)) {
+            const liElement = currentElement.classList[0]; 
+            if (!isNullOrUndefined(liElement) && liElement.indexOf('table-component') !== -1) {
+                return true;
+            }
 
-        if (isNullOrUndefined(parentElement)) {
-            return false;
+            currentElement = currentElement.parentElement;
         }
 
-        const liElement = parentElement.classList[0];
-
-        if (isNullOrUndefined(liElement)) {
-            return false;
-        }
-
-        return liElement.indexOf('table-component') !== -1;
+        return false;
     }
 
     private clickOnPopup(event: any): boolean {
@@ -176,6 +175,7 @@ export default class TreeComponent extends Vue {
     private deselectCollection(event: any, dblClick: boolean = false) {
         if (!this.clickOnPopup(event)) {
             if (!this.clickOnTable(event) || dblClick) {
+                console.log('DESELECT')
                 this.selectPopup = false;
                 this.showPopup = false;
 
@@ -189,25 +189,30 @@ export default class TreeComponent extends Vue {
     private selectCollection() {
         // Set the collection to show to the hovered one and block the hovering.
         this.selectPopup = true;
+        this.popupOutOfBounds = false;
 
         if (!isNullOrUndefined(this.collectionToShow)) {
             this.collectionToShow.element.style.backgroundColor = '';
         }
 
         this.collectionToShow = this.hoveredCollection;
-        this.positionPopup = this.collectionToShow.offsetTop - this.scrollTop;
-        console.log('click: ', this.collectionToShow);
+        this.positionPopup = this.collectionToShow.offsetTop - this.$el.parentElement.offsetTop;
+
         this.collectionToShow.element.style.backgroundColor = 'darkgray';
+        this.scrollTop = document.getElementById("scrollable").scrollTop;
+
+        console.log('CLICK:', this.collectionToShow);
     }
 
     private hoverCollection(event: any) {
+        console.log('HOVER:', event);
         this.hoveredCollection = event;
         // If there is no collection selected we show the popup of the collection
         // located under the mouse pointer.
         if (!this.selectPopup) {
             this.collectionToShow = this.hoveredCollection;
             this.showPopup = true;
-            this.positionPopup = this.collectionToShow.offsetTop - this.scrollTop;
+            this.positionPopup = this.collectionToShow.offsetTop - this.$el.parentElement.offsetTop;
         }
     }
 
@@ -215,14 +220,29 @@ export default class TreeComponent extends Vue {
         // Apply only when no collection is selected
         if (!this.selectPopup) {
             this.showPopup = false;
+            console.log('leave');
         }
     }
 
     private scrollAlongTree(event: any) {
-        this.scrollTop = event.target.scrollTop;
         // Update the position of the selected collection if there is any.
         if (this.selectPopup) {
-            this.positionPopup = this.collectionToShow.offsetTop - this.scrollTop;
+            const deltaScroll = event.target.scrollTop - this.scrollTop;
+            this.positionPopup = this.collectionToShow.offsetTop - this.$el.parentElement.offsetTop - deltaScroll;
+        
+            // Check whether the selection is out of the scrolling window.
+            // If so, disable the plot of the popup
+            this.popupOutOfBounds = false;
+            let scrollableElement = document.getElementById("scrollable");
+            const topWidget = scrollableElement.offsetTop;
+            const bottomWidget = scrollableElement.offsetTop + scrollableElement.offsetHeight;
+
+            const bottomTableElement = this.positionPopup + this.collectionToShow.element.offsetHeight;
+            const topTableElement = this.positionPopup;
+
+            if (bottomTableElement < topWidget || topTableElement > bottomWidget) {
+                this.popupOutOfBounds = true;
+            }
         }
     }
 }

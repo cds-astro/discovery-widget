@@ -10,7 +10,7 @@
             $emit('filter', search)
         "
         v-bind:value="search"
-        placeholder="Search...">
+        placeholder="Search..." />
   </div>
 </template>
 
@@ -33,8 +33,13 @@ export default class SearchComponent extends Vue {
 #search-component {
     width: 100%;
     margin-top: 10px;
+    position: relative;
 }
-input {
-    width:100%;
+
+#search-component input {
+
+    display: block;
+    margin : 0 auto;
+    width: 100%;
 }
 </style>

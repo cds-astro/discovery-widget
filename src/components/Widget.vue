@@ -419,7 +419,8 @@ export default class WidgetComponent extends Vue {
                     client_category: table.client_category,
                     dataproduct_type: table.dataproduct_type,
                     inViewport: false,
-                    filtered: true
+                    filtered: true,
+                    vizier_popularity: table.vizier_popularity,
                 };
                 /* Construct the tree by adding its client category */
                 this.root.addTable(tableID, tableHeader, this.tableToNode); 

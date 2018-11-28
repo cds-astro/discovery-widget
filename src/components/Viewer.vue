@@ -49,10 +49,6 @@ export default class ViewerComponent extends Vue {
     bodyElement.appendChild(scriptElement);
   }
 
-    private toto() {
-        console.log('toto');
-    }
-
   private mounted() {
     // Now the component is mounted we can load aladin lite.
     const bodyElement = document.getElementsByTagName('BODY')[0] as HTMLElement;
@@ -77,10 +73,12 @@ export default class ViewerComponent extends Vue {
       this.$root.$on('addImage', (metadata: AddHiPSSurveyData) => {
         const order = (+metadata.hips_order);
         const hipsTileFormat = metadata.hips_tile_format.split(' ');
-        let tileFormat = hipsTileFormat[0];
-        if (tileFormat === 'jpeg') {
-          tileFormat = 'jpg';
+        let tileFormat = 'jpg';
+
+        if (hipsTileFormat.indexOf('png') >= 0) {
+            tileFormat = 'png';
         }
+        
         const imageSurvey = this.aladin.createImageSurvey(metadata.ID,
           metadata.ID,
           metadata.hips_service_url,

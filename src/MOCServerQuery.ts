@@ -49,6 +49,7 @@ export interface HeaderResponse {
     obs_id: string;
     client_category: string;
     dataproduct_type: string;
+    vizier_popularity: number;
 }
 
 export class TreeViewportMOCServerQuery extends MOCServer {
@@ -56,7 +57,7 @@ export class TreeViewportMOCServerQuery extends MOCServer {
         let url = MOCServer.URL +
         'get=record&' +
         'fmt=json&' +
-        'fields=ID, obs_id, obs_title, client_category, dataproduct_type&' +
+        'fields=ID, obs_id, obs_title, client_category, dataproduct_type, vizier_popularity&' +
         'expr=(dataproduct_type=image,catalog)';
         url += vp ? '&' + vp.toString() : '';
 
@@ -74,7 +75,7 @@ export class TreeFilterMOCServerQuery extends MOCServer {
         let url = MOCServer.URL +
         'get=record&' +
         'fmt=json&' +
-        'fields=ID, obs_id, obs_title, client_category, dataproduct_type&' +
+        'fields=ID, obs_id, obs_title, client_category, dataproduct_type, vizier_popularity&' +
         'casesensitive=false&' +
         'expr=(dataproduct_type=image,catalog';
         let filterUri = ')';
@@ -83,7 +84,7 @@ export class TreeFilterMOCServerQuery extends MOCServer {
             const kws = filter.split(' ');
             filterUri = '';
             kws.forEach((kw) => {
-                filterUri += '&&obs_*=*' + kw + '*';
+                filterUri += '&&(obs_title=*' + kw + '*||obs_id=*' + kw + '*||obs_collection=*' + kw + '*)';
             });
             filterUri += ')';
         }
@@ -104,7 +105,7 @@ export class RetrieveAllDatasetHeadersQuery extends MOCServer {
         const url = MOCServer.URL +
         'get=record&' +
         'fmt=json&' +
-        'fields=ID, obs_id, obs_title, client_category, dataproduct_type&' +
+        'fields=ID, obs_id, obs_title, client_category, dataproduct_type, vizier_popularity&' +
         'expr=(dataproduct_type=image,catalog)';
 
         return url;
