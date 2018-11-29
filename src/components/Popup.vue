@@ -4,7 +4,9 @@
     <div id="popup-component">
         <div id="header">
             <div id="figure">
-                <img v-bind:src="record.previewURL" alt="preview">
+                <img v-if="record.isVizierCatalog()" v-bind:src="record.previewURL" alt="preview">
+                <img v-else v-bind:style="{ height: '100px' }" v-bind:src="record.previewURL" alt="preview">
+
                 <figcaption><p>{{ record.id }}</p></figcaption>
             </div>
             <ul v-if="record.obs_regime && record.obs_regime.length > 0">
@@ -183,31 +185,43 @@ export default class PopupComponent extends Vue {
 
 img {
   font-family: 'Helvetica';
-  font-weight: 300;
-  line-height: 2;  
-  text-align: center;
-  
-  width: 100px;
-  height: auto;
   display: block;
   position: relative;
+
+  width: 100px;
+  height:auto;
 }
 
-img:after { 
-  content: "\f127" " not available";
+img:before {
+  background-image: url("./../../thumbnail.jpeg");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 100px 100px;
+
+  width: 100%;
+  height: 100%;
   
-  font-size: 12px;
-  font-family: FontAwesome;
-  color: rgb(100, 100, 100);
+  content: " ";
   
   display: block;
   position: absolute;
   z-index: 2;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
   background-color: white;
+}
+
+img:after {
+  content: "\f127" " not available";
+  font-size: 12px;
+  font-family: FontAwesome;
+  color: black;
+  display: block;
+  position: absolute;
+  z-index: 2;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 
 #header, #content {
