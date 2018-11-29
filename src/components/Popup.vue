@@ -171,12 +171,12 @@ export default class PopupComponent extends Vue {
     position: absolute;
     overflow: hidden;
 
-    background-color: whitesmoke;
+    background-color: white;
     color: black;
     list-style-type: none;
     text-align: center;
     border: 1px solid black;
-    border-radius: 4px;
+    border-radius: 2px;
     width: 402px;
     padding: 5px;
 }
@@ -207,7 +207,7 @@ img:after {
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: whitesmoke;
+  background-color: white;
 }
 
 #header, #content {
@@ -290,6 +290,6 @@ figcaption p {
     transform: translate(-50%, -50%);
 }
 #quit:hover {
-    background-color: darkred;
+    color: red;
 }
 </style>

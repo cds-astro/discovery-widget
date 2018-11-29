@@ -2,8 +2,10 @@
 
 <template>
     <div id="collection-component">
-        <h4 v-bind:style="{color: inViewport()}">{{ collectionName() }}</h4>
-        <p v-bind:style="{color: inViewport()}">{{ author() }}</p>
+        <div class="header">
+            <h4 v-bind:style="{color: inViewport()}">{{ collectionName() }}</h4>
+            <p class="author" v-bind:style="{color: inViewport()}">{{ author() }}</p>
+        </div>
         <ul>
             <li class="table-component" v-for="i in tables.length"
                 v-if="tables[i-1].obs_title && tables[i-1].filtered"
@@ -94,8 +96,6 @@ export default class CollectionComponent extends Vue {
     private showPopup(table: HeaderDatasetType, element: HTMLLIElement) {
         this.popup = true;
 
-        console.log('lement', element.style)
-
         this.$emit('toggle-popup', {
             header: table,
             offsetTop: element.getBoundingClientRect().top,
@@ -158,36 +158,39 @@ export default class CollectionComponent extends Vue {
 
 <style>
 .table-component {
-    padding: 5px 0px;
+    padding: 5px 10px;
     color: green;
     list-style-type: none;
     text-align: left;
-    border-top: 0.2px solid white;
-    border-left: 0.2px solid white;
+    border-top: 1px solid gainsboro;
     position: relative;
     overflow: hidden;
 }
 
 #collection-component ul {
-    background-color: lightgray;
+    background-color: white;
     cursor: pointer;
+}
+
+#collection-component div.header {
+    padding: 3px;
 }
 
 #collection-component {
     margin-top: 5px;
-    border: 1px solid darkgray;
-}
-
-#collection-component h4 {
-    text-align: center;
+    border: 1px solid gray;
 }
 
 #collection-component h4, #collection-component p {
-    margin: 2px;
     word-wrap: break-word;
 }
 
 .table-component:hover {
-    background-color: silver;
+    background-color: gainsboro;
+}
+
+p.author {
+    font-size: small;
+    font-style: italic; 
 }
 </style>

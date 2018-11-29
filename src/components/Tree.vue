@@ -24,26 +24,22 @@
                 </div>
             </li>
         </ul>
-        <div id="scrollable" v-on:scroll="scrollAlongTree($event)">
-            <div id="noleaf" v-if="root && !root.isLeaf()">
+        <div id="noleaf" v-if="root && !root.isLeaf()">
+            <div id="scrollable" v-on:scroll="scrollAlongTree($event)">
                 <ul id="tree">
                     <li class="node" v-for="child in root.children"
-                        v-if="child.numberOfCatalogs>0">
+                        v-if="child.numberOfCatalogs>0"
+                        v-on:click="
+                            root = child;
+                            p.push(child.ID);
+                            $emit('path-event', p);">
                         <!-- Leaf so print the collections -->
                         <p  v-if="child.inViewport"
-                            v-bind:style="{color: 'green'}"
-                            v-on:click="
-                                root = child;
-                                p.push(child.ID);
-                                $emit('path-event', p);">
+                            v-bind:style="{color: 'green'}">
                             {{ child.ID }} {{ '(' + child.numberOfCatalogs + ')' }}
                         </p>
                         <p  v-else
-                            v-bind:style="{color: 'red'}"
-                            v-on:click="
-                                root = child;
-                                p.push(child.ID);
-                                $emit('path-event', p);">
+                            v-bind:style="{color: 'red'}">
                             {{ child.ID }} {{ '(' + child.numberOfCatalogs + ')' }}
                         </p>
                     </li>
@@ -61,7 +57,9 @@
                     </li>
                 </ul>
             </div>
-            <div id="leaf" v-else-if="root && root.isLeaf()">
+        </div>
+        <div id="leaf" v-else-if="root && root.isLeaf()">
+            <div id="scrollable" v-on:scroll="scrollAlongTree($event)">
                 <ul>
                     <li v-for="i in root.catalogsList.length"
                         v-if="root.catalogsToShow[i - 1]">
@@ -200,7 +198,7 @@ export default class TreeComponent extends Vue {
         this.collectionToShow = this.hoveredCollection;
         this.positionPopup = this.collectionToShow.offsetTop - this.$el.parentElement.offsetTop;
 
-        this.collectionToShow.element.style.backgroundColor = 'darkgray';
+        this.collectionToShow.element.style.backgroundColor = 'lightgray';
         this.scrollTop = document.getElementById("scrollable").scrollTop;
 
         console.log('CLICK:', this.collectionToShow);
@@ -251,6 +249,9 @@ export default class TreeComponent extends Vue {
 </script>
 
 <style>
+#tree-component {
+    margin-bottom: 15px;
+}
 
 #scrollable {
     overflow-y: scroll;
@@ -260,16 +261,21 @@ export default class TreeComponent extends Vue {
 
 ul#tree {
     list-style-type: circle;
-    background-color: lightgray;
+    background-color: white;
 }
 
 ul {
     padding-left: 0;
 }
 
+li {
+    list-style-type: none;
+}
+
 ul#path {
     overflow: auto;
     list-style-type: none;
+    margin: 5px 0px;
 }
 
 li.directory p.name {
@@ -285,8 +291,13 @@ li.directory p.separator {
     float: left;
 }
 
+li.node {
+    border-bottom: 1px solid gainsboro;
+    padding: 5px 10px;
+}
+
 li.node:hover {
-    background-color: silver;
+    background-color: gainsboro;
     cursor: pointer;
 }
 
@@ -304,6 +315,7 @@ li.node:hover {
     border-radius: 4px;
     width: 24px;
     height: 24px;
+    font-size: 16px;
 }
 
 #home i {

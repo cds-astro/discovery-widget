@@ -1,6 +1,7 @@
 {
   "name": "collection-tree",
   "version": "0.1.0",
+  "homepage": "./moctree/",
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",

@@ -8,24 +8,7 @@
         v-bind:viewport="viewport">
     </TreeComponent>
 
-    <!--
-    <ul v-if="cataloguesList.length > 0"
-        v-on:scroll="scrollAlongTree($event)">
-        <li v-for="catalog in cataloguesList">
-            <CollectionComponent
-                v-bind:catalog="catalog"
-                v-on:toggle-popup="hoverCollection($event)"
-                v-on:hide-popup="leaveCollection()"
-                v-on:click.native="selectCollection()">
-            </CollectionComponent>
-        </li>
-    </ul>
-    <p v-else-if="init">Init list of collections</p>
-    <p v-else>No collections found!</p>
-    -->
-    <SearchComponent
-        v-on:filter="queryMOCServer($event)">
-    </SearchComponent>
+    <SearchComponent v-on:filter="queryMOCServer($event)"></SearchComponent>
     <!-- Pagination component -->
     
     <!-- <PaginationComponent 
@@ -64,6 +47,7 @@ export class Tree {
     public catalogsToShow: Boolean[];
     public numberOfCatalogs: number;
     public inViewport: boolean;
+
     constructor(ID: string, parent: Tree) {
         this.children = [];
         this.ID = ID;
@@ -530,7 +514,7 @@ export default class WidgetComponent extends Vue {
     position:absolute;
     top:40px;
     left:40px;
-    background-color: whitesmoke;
+    background-color: white;
     color:black;
     border: 1px solid gray;
     padding: 5px;
@@ -540,12 +524,12 @@ export default class WidgetComponent extends Vue {
 
 ul {
     width: 100%;
-    margin-top: 0;
+    margin: 0;
 }
 
 p, h3, h4 {
-    font-family: Verdana,Lucida,Arial;
-    margin:0;
+    font-family:Arial, Helvetica, sans-serif;
+    margin: 0;
 }
 
 p {
@@ -555,6 +539,5 @@ p {
 
 #title {
     text-align: center;
-    margin-bottom: 5px;
 }
 </style>

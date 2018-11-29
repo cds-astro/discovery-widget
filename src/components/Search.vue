@@ -2,6 +2,7 @@
 
 <template>
   <div id="search-component">
+    <p>Keywords: </p>
     <input 
         v-on:input="
             search=$event.target.value
@@ -10,15 +11,20 @@
             $emit('filter', search)
         "
         v-bind:value="search"
-        placeholder="Search..." />
+        placeholder="Search...">
+    <TooltipComponent v-bind:type="0" v-bind:text="'Search for specific collections by typing keywords (e.g. SDSS or AllWISE)'"></TooltipComponent>
   </div>
 </template>
 
 <script lang="ts">
 import { Vue, Prop, Component, Watch } from 'vue-property-decorator';
+import TooltipComponent from './Tooltip.vue';
 
 @Component({
     name: 'search-component',
+    components: {
+        TooltipComponent,
+    },
 })
 export default class SearchComponent extends Vue {
     private search: string = '';
@@ -31,15 +37,18 @@ export default class SearchComponent extends Vue {
 
 <style>
 #search-component {
-    width: 100%;
-    margin-top: 10px;
-    position: relative;
+    display: flex;
 }
 
 #search-component input {
-
-    display: block;
-    margin : 0 auto;
+    margin: 0px 5px;
     width: 100%;
 }
+
+/*
+#search-component .question-icon:hover {
+    color: red;
+    cursor: help;
+}
+*/
 </style>
