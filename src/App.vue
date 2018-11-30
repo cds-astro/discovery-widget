@@ -19,11 +19,13 @@ import PanelIconComponent from './components/PanelIcon.vue';
 export default class App extends Vue {}
 </script>
 
-<style>
+<style lang="css">
 body {
   overflow:hidden;
   margin:0;
 }
+
+@import './css/scrollbar.css';
 </style>
 
 

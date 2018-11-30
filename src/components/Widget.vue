@@ -2,8 +2,9 @@
 
 <template>
 <div id="widget-component" v-bind:style="{ top: offsetTop.toString() + 'px' }">
-    <h3 id="title">Collection Selection Tool</h3>
     <QuitComponent v-on:quit="$emit('quit')"></QuitComponent>
+    <h3 id="title">Collection Selection Tool</h3>
+    <FilterComponent></FilterComponent>
     <TreeComponent 
         v-bind:tree="root"
         v-bind:viewport="viewport">
@@ -16,12 +17,12 @@
 <script lang="ts">
 import { Vue, Component, Prop, Watch } from 'vue-property-decorator';
 import SearchComponent from './Search.vue';
-import PaginationComponent from './Pagination.vue';
 import CollectionComponent from './Collection.vue';
 import QuitComponent from './QuitIcon.vue';
 import TreeComponent from './Tree.vue';
 import { HeaderSelectionEvent } from './Collection.vue';
 import PopupComponent from './Popup.vue';
+import FilterComponent from './Filter.vue';
 import { TreeViewportMOCServerQuery, TreeFilterMOCServerQuery, HeaderResponse } from './../MOCServerQuery';
 import { RetrieveAllDatasetHeadersQuery } from './../MOCServerQuery';
 import { Viewport } from './../Viewport';
@@ -321,8 +322,8 @@ export class Tree {
     name: 'widget-component',
     components: {
         SearchComponent,
-        PaginationComponent,
         TreeComponent,
+        FilterComponent,
         QuitComponent,
     },
 })
@@ -512,10 +513,8 @@ export default class WidgetComponent extends Vue {
     left:40px;
     background-color: white;
     color:black;
-    border: 1px solid gray;
-    padding: 5px;
-
-    border-radius: 4px;
+    /*border: 1px solid gray;*/
+    /*padding: 5px;*/
 }
 
 ul {
@@ -535,5 +534,6 @@ p {
 
 #title {
     text-align: center;
+    margin: 15px;
 }
 </style>

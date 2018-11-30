@@ -38,6 +38,7 @@ export default class SearchComponent extends Vue {
 <style>
 #search-component {
     display: flex;
+    margin: 0px 5px 5px 5px;
 }
 
 #search-component input {

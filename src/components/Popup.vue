@@ -181,7 +181,7 @@ export default class PopupComponent extends Vue {
     color: black;
     list-style-type: none;
     text-align: center;
-    border: 1px solid black;
+    border: 1px solid gray;
     border-radius: 2px;
     width: 402px;
     padding: 5px;

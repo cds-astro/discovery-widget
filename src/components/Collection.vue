@@ -157,8 +157,23 @@ export default class CollectionComponent extends Vue {
 </script>
 
 <style>
+#collection-component {
+    margin-top: 0px;
+    border-top: 2px solid gray;
+}
+#collection-component ul {
+    background-color: white;
+    cursor: pointer;
+}
+#collection-component div.header {
+    padding: 5px;
+}
+#collection-component h4, #collection-component p {
+    word-wrap: break-word;
+}
+
 .table-component {
-    padding: 5px 10px;
+    padding: 8px 10px;
     color: green;
     list-style-type: none;
     text-align: left;
@@ -166,25 +181,6 @@ export default class CollectionComponent extends Vue {
     position: relative;
     overflow: hidden;
 }
-
-#collection-component ul {
-    background-color: white;
-    cursor: pointer;
-}
-
-#collection-component div.header {
-    padding: 3px;
-}
-
-#collection-component {
-    margin-top: 5px;
-    border: 1px solid gray;
-}
-
-#collection-component h4, #collection-component p {
-    word-wrap: break-word;
-}
-
 .table-component:hover {
     background-color: gainsboro;
 }

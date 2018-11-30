@@ -277,7 +277,15 @@ li {
 ul#path {
     overflow: auto;
     list-style-type: none;
-    margin: 5px 0px;
+    margin: 5px 5px;
+}
+
+ul#path p {
+    font-size: 15px;
+}
+
+ul#path .separator {
+    margin: 0px 3px;
 }
 
 li.directory p.name {
@@ -294,8 +302,8 @@ li.directory p.separator {
 }
 
 li.node {
-    border-bottom: 1px solid gainsboro;
-    padding: 5px 10px;
+    border-top: 1px solid gainsboro;
+    padding: 8px 10px;
 }
 
 li.node:hover {

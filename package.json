@@ -12,13 +12,17 @@
     "util": "^0.11.1",
     "vue": "^2.5.17",
     "vue-class-component": "^6.0.0",
-    "vue-property-decorator": "^7.0.0"
+    "vue-property-decorator": "^7.0.0",
+    "vue-slider-component": "^2.8.2",
+    "vuejs-datepicker": "^1.5.4"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "^3.0.1",
     "@vue/cli-plugin-typescript": "^3.0.1",
     "@vue/cli-service": "^3.0.1",
     "lint-staged": "^7.2.2",
+    "node-sass": "^4.10.0",
+    "sass-loader": "^7.1.0",
     "typescript": "^3.0.0",
     "vue-template-compiler": "^2.5.17"
   },
