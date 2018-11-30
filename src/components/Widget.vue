@@ -3,19 +3,13 @@
 <template>
 <div id="widget-component" v-bind:style="{ top: offsetTop.toString() + 'px' }">
     <h3 id="title">Collection Selection Tool</h3>
+    <QuitComponent v-on:quit="$emit('quit')"></QuitComponent>
     <TreeComponent 
         v-bind:tree="root"
         v-bind:viewport="viewport">
     </TreeComponent>
 
     <SearchComponent v-on:filter="queryMOCServer($event)"></SearchComponent>
-    <!-- Pagination component -->
-    
-    <!-- <PaginationComponent 
-        v-bind:numCollections="numPrintedCollections"
-        v-on:pagination="sliceHeaders($event)">
-    </PaginationComponent>
-    -->
 </div>
 </template>
 
@@ -24,6 +18,7 @@ import { Vue, Component, Prop, Watch } from 'vue-property-decorator';
 import SearchComponent from './Search.vue';
 import PaginationComponent from './Pagination.vue';
 import CollectionComponent from './Collection.vue';
+import QuitComponent from './QuitIcon.vue';
 import TreeComponent from './Tree.vue';
 import { HeaderSelectionEvent } from './Collection.vue';
 import PopupComponent from './Popup.vue';
@@ -328,6 +323,7 @@ export class Tree {
         SearchComponent,
         PaginationComponent,
         TreeComponent,
+        QuitComponent,
     },
 })
 export default class WidgetComponent extends Vue {
@@ -528,7 +524,7 @@ ul {
 }
 
 p, h3, h4 {
-    font-family:Arial, Helvetica, sans-serif;
+    font-family: Helvetica, Arial, sans-serif;
     margin: 0;
 }
 

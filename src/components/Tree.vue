@@ -4,9 +4,9 @@
     <div id="tree-component">
         <PopupComponent ref="popupComponent"
             v-show="showPopup && !popupOutOfBounds"
+            v-on:quit="hidePopup()"
             v-bind:collection="collectionToShow"
             v-bind:viewport="viewport"
-            v-on:exit="selectPopup=false"
             v-bind:style="{
                 top: positionPopup.toString() + 'px',
             }">
@@ -160,8 +160,6 @@ export default class TreeComponent extends Vue {
         while (!isNullOrUndefined(currentElement)) {
             if (currentElement.id === 'popup-component') {
                 return true;
-            } else if (currentElement.id === 'quit') {
-                return false;
             }
 
             currentElement = currentElement.parentElement;
@@ -175,14 +173,18 @@ export default class TreeComponent extends Vue {
     private deselectCollection(event: any, dblClick: boolean = false) {
         if (!this.clickOnPopup(event)) {
             if (!this.clickOnTable(event) || dblClick) {
-                console.log('DESELECT')
-                this.selectPopup = false;
-                this.showPopup = false;
-
-                if (!isNullOrUndefined(this.collectionToShow)) {
-                    this.collectionToShow.element.style.backgroundColor = '';
-                }
+                this.hidePopup();
             }
+        }
+    }
+
+    private hidePopup() {
+        console.log('HIDE')
+        this.selectPopup = false;
+        this.showPopup = false;
+
+        if (!isNullOrUndefined(this.collectionToShow)) {
+            this.collectionToShow.element.style.backgroundColor = '';
         }
     }
 

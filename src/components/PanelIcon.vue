@@ -6,6 +6,7 @@
             v-on:click="showCollectionTree = !showCollectionTree"
             v-bind:style="{top: offsetTop.toString() + 'px'}"><i class="fa fa-database"></i></a>
         <WidgetComponent v-show="showCollectionTree"
+            v-on:quit="showCollectionTree=false"
             v-bind:offsetTop="offsetTop"></WidgetComponent>
   </div>
 </template>

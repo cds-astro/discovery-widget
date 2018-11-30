@@ -20,7 +20,7 @@
         <div id="content">
             <div id="title">
                 <h4>{{ record.obs_title }}</h4>
-                <a id="quit"><i class="fa fa-times fa-lg"></i></a>
+                <QuitComponent v-on:quit="$emit('quit')"></QuitComponent>
             </div>
 
             <div v-if="record.description" id="description"><p>{{ record.description }}</p></div>
@@ -56,6 +56,7 @@ import { RetrieveRecordCollectionQuery } from './../MOCServerQuery';
 import { Viewport } from './../Viewport';
 import { HeaderSelectionEvent } from './Collection.vue';
 import { isNullOrUndefined } from 'util';
+import QuitComponent from './QuitIcon.vue';
 
 class Record {
     public data: any;
@@ -128,6 +129,9 @@ class Record {
 
 @Component({
     name: 'popup-component',
+    components: {
+        QuitComponent,
+    },
 })
 export default class PopupComponent extends Vue {
     @Prop() public collection!: HeaderSelectionEvent;
@@ -283,27 +287,5 @@ figcaption p {
 
 #content #title {
     width: 280px;
-}
-
-#quit {
-    position: absolute;
-    top: 0%;
-    left:100%;
-    transform: translate(-100%, 0%);
-    border: none;
-    background: rgba(250,250,250,0.8);
-    border-radius: 2px;
-    width: 24px;
-    height: 24px;
-}
-
-#quit i {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-}
-#quit:hover {
-    color: red;
 }
 </style>
