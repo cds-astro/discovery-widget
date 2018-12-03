@@ -13,9 +13,7 @@
     "allowSyntheticDefaultImports": true,
     "sourceMap": true,
     "baseUrl": ".",
-    "types": [
-      "node"
-    ],
+    "types": [],
     "paths": {
       "@/*": [
         "src/*"
@@ -31,8 +29,8 @@
   "include": [
     "src/**/*.ts",
     "src/**/*.tsx",
-    "src/**/*.css",
     "src/**/*.vue",
+    "src/**/*.css",
     "tests/**/*.ts",
     "tests/**/*.tsx"
   ],

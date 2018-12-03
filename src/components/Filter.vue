@@ -104,7 +104,7 @@ export default class FilterComponent extends Vue {
 </script>
 
 <style lang="scss">
-$size-lang: 20px;
+$size-lang: 10px;
 $pos-y-lang: 20px;
 
 #filter {

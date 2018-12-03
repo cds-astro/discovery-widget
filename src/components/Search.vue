@@ -1,19 +1,20 @@
 <!-- src/components/Search.vue -->
 
 <template>
-  <div id="search-component">
-    <p>Keywords: </p>
-    <input 
-        v-on:input="
-            search=$event.target.value
-            // Call the filter method and send its result
-            // to the tree component.
-            $emit('filter', search)
-        "
-        v-bind:value="search"
-        placeholder="Search...">
-    <TooltipComponent v-bind:type="0" v-bind:text="'Search for specific collections by typing keywords (e.g. SDSS or AllWISE)'"></TooltipComponent>
-  </div>
+    <div id="search-component">
+        <p>Keywords: </p>
+        <div class="wrap">
+            <input
+                v-on:input="
+                    search=$event.target.value
+                    // Call the filter method and send its result
+                    // to the tree component.
+                    $emit('filter', search)
+                "
+                v-bind:value="search" placeholder="Search..." />
+        </div>
+        <TooltipComponent v-bind:type="0" v-bind:text="'Search for specific collections by typing keywords (e.g. SDSS or AllWISE)'"></TooltipComponent>
+    </div>
 </template>
 
 <script lang="ts">
@@ -35,21 +36,27 @@ export default class SearchComponent extends Vue {
 }
 </script>
 
-<style>
+<style lang="scss">
 #search-component {
     display: flex;
-    margin: 0px 5px 5px 5px;
-}
+    align-items: center;
+    
+    margin: 0px 10px;
 
-#search-component input {
-    margin: 0px 5px;
-    width: 100%;
-}
+    .wrap {
+        margin: 0px 5px;
 
-/*
-#search-component .question-icon:hover {
-    color: red;
-    cursor: help;
+        input {
+            width: 100%;
+            background-color: whitesmoke;
+            border: 1px solid gainsboro;
+            color: gray;
+
+            padding: 0;
+            padding: 2px 0px;
+
+            font-family: Helvetica, Arial, sans-serif;
+        }
+    }
 }
-*/
 </style>

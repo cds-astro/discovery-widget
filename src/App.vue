@@ -19,7 +19,7 @@ import PanelIconComponent from './components/PanelIcon.vue';
 export default class App extends Vue {}
 </script>
 
-<style lang="css">
+<style lang="scss">
 body {
   overflow:hidden;
   margin:0;

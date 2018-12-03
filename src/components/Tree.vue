@@ -12,67 +12,50 @@
             }">
         </PopupComponent>
 
-        <ul id="path">
-            <li class="directory" v-for="i in p.length"
-                v-on:click="
-                    p = p.slice(0, i);
-                    root = tree.findNode(p);
-                ">
-                <a v-if="i==1" id="home"><i class="fa fa-home fa-lg"></i></a>
-                <div v-else>
-                    <p class="separator">/</p><p class="name">{{ p[i - 1] }}</p>
-                </div>
-            </li>
-        </ul>
         <div id="noleaf" v-if="root && !root.isLeaf()">
-            <div id="scrollable" v-on:scroll="scrollAlongTree($event)">
-                <ul id="tree">
-                    <li class="node" v-for="child in root.children"
-                        v-if="child.numberOfCatalogs>0"
-                        v-on:click="
-                            root = child;
-                            p.push(child.ID);
-                            $emit('path-event', p);">
-                        <!-- Leaf so print the collections -->
-                        <p  v-if="child.inViewport"
-                            v-bind:style="{color: 'green'}">
-                            {{ child.ID }} {{ '(' + child.numberOfCatalogs + ')' }}
-                        </p>
-                        <p  v-else
-                            v-bind:style="{color: 'red'}">
-                            {{ child.ID }} {{ '(' + child.numberOfCatalogs + ')' }}
-                        </p>
-                    </li>
-                </ul>
-                <ul>
-                    <li v-for="i in root.catalogsList.length"
-                        v-if="root.catalogsToShow[i - 1]">
-                        <CollectionComponent ref="childComponent"
-                            v-bind:catalog="root.catalogsList[i - 1]"
-                            v-on:toggle-popup="hoverCollection($event)"
-                            v-on:hide-popup="leaveCollection()"
-                            v-on:click.native="selectCollection()"
-                            v-on:dblclick.native="dblClickClk($event)">
-                        </CollectionComponent>
-                    </li>
-                </ul>
-            </div>
+            <ul>
+                <li class="node" v-for="child in root.children"
+                    v-if="child.numberOfCatalogs>0"
+                    v-on:click="
+                        //root = child;
+                        $emit('addToPath', child.ID);">
+                    <!-- Leaf so print the collections -->
+                    <p  v-if="child.inViewport"
+                        v-bind:style="{color: 'green'}">
+                        {{ child.ID }} {{ '(' + child.numberOfCatalogs + ')' }}
+                    </p>
+                    <p  v-else
+                        v-bind:style="{color: 'red'}">
+                        {{ child.ID }} {{ '(' + child.numberOfCatalogs + ')' }}
+                    </p>
+                </li>
+            </ul>
+            <ul>
+                <li v-for="i in root.catalogsList.length"
+                    v-if="root.catalogsToShow[i - 1]">
+                    <CollectionComponent ref="childComponent"
+                        v-bind:catalog="root.catalogsList[i - 1]"
+                        v-on:toggle-popup="hoverCollection($event)"
+                        v-on:hide-popup="leaveCollection()"
+                        v-on:click.native="selectCollection()"
+                        v-on:dblclick.native="dblClickClk($event)">
+                    </CollectionComponent>
+                </li>
+            </ul>
         </div>
         <div id="leaf" v-else-if="root && root.isLeaf()">
-            <div id="scrollable" v-on:scroll="scrollAlongTree($event)">
-                <ul>
-                    <li v-for="i in root.catalogsList.length"
-                        v-if="root.catalogsToShow[i - 1]">
-                        <CollectionComponent ref="childComponent"
-                            v-bind:catalog="root.catalogsList[i - 1]"
-                            v-on:toggle-popup="hoverCollection($event)"
-                            v-on:hide-popup="leaveCollection()"
-                            v-on:click.native="selectCollection()"
-                            v-on:dblclick.native="dblClickClk($event)">
-                        </CollectionComponent>
-                    </li>
-                </ul>
-            </div>
+            <ul>
+                <li v-for="i in root.catalogsList.length"
+                    v-if="root.catalogsToShow[i - 1]">
+                    <CollectionComponent ref="childComponent"
+                        v-bind:catalog="root.catalogsList[i - 1]"
+                        v-on:toggle-popup="hoverCollection($event)"
+                        v-on:hide-popup="leaveCollection()"
+                        v-on:click.native="selectCollection()"
+                        v-on:dblclick.native="dblClickClk($event)">
+                    </CollectionComponent>
+                </li>
+            </ul>
         </div>
     </div>
 </template>
@@ -100,7 +83,12 @@ export default class TreeComponent extends Vue {
     @Prop() public tree!: Tree;
     @Prop() public viewport!: Viewport;
 
-    private p: String[] = [''];
+    @Prop() public scrollPositionY!: number;
+    @Watch('scrollPositionY')
+    public changeScrollPositionY(scrollY: number, prevScrollY: number) {
+        this.scrollAlongTree(scrollY);
+    }
+
     private root: Tree = null;
 
     /* Popup metadata */
@@ -115,13 +103,15 @@ export default class TreeComponent extends Vue {
     @Watch('tree')
     public changeTree(newTree: Tree, oldRoot: Tree) {
         // Find the node where the user is so that the tree does not cd to its root
+        /*
         const path = this.root.getPath();
-        console.log('PATH ROOT', path)
+        console.log('PATH ROOT', path);
         const newRoot = newTree.findNode(path);
         if (!isNullOrUndefined(newRoot)) {
             this.root = newRoot;
             this.$forceUpdate();
-        }
+        }*/
+        this.root = newTree;
     }
 
     /* Add the collection double clicked */
@@ -198,10 +188,12 @@ export default class TreeComponent extends Vue {
         }
 
         this.collectionToShow = this.hoveredCollection;
-        this.positionPopup = this.collectionToShow.offsetTop - this.$el.parentElement.offsetTop;
+        let scrollableElement = this.$el.parentElement;
+        let widgetElement = scrollableElement.parentElement;
+        this.positionPopup = this.collectionToShow.offsetTop - widgetElement.offsetTop;
 
         this.collectionToShow.element.style.backgroundColor = 'lightgray';
-        this.scrollTop = document.getElementById("scrollable").scrollTop;
+        this.scrollTop = this.scrollPositionY;
 
         console.log('CLICK:', this.collectionToShow);
     }
@@ -214,7 +206,10 @@ export default class TreeComponent extends Vue {
         if (!this.selectPopup) {
             this.collectionToShow = this.hoveredCollection;
             this.showPopup = true;
-            this.positionPopup = this.collectionToShow.offsetTop - this.$el.parentElement.offsetTop;
+
+            let scrollableElement = this.$el.parentElement;
+            let widgetElement = scrollableElement.parentElement;
+            this.positionPopup = this.collectionToShow.offsetTop - widgetElement.offsetTop;
         }
     }
 
@@ -226,16 +221,19 @@ export default class TreeComponent extends Vue {
         }
     }
 
-    private scrollAlongTree(event: any) {
+    private scrollAlongTree(scrollTopPosition: number) {
         // Update the position of the selected collection if there is any.
         if (this.selectPopup) {
-            const deltaScroll = event.target.scrollTop - this.scrollTop;
-            this.positionPopup = this.collectionToShow.offsetTop - this.$el.parentElement.offsetTop - deltaScroll;
+            let scrollableElement = this.$el.parentElement;
+            let widgetElement = scrollableElement.parentElement;
+
+            const deltaScroll = scrollTopPosition - this.scrollTop;
+            this.positionPopup = this.collectionToShow.offsetTop - widgetElement.offsetTop - deltaScroll;
         
             // Check whether the selection is out of the scrolling window.
             // If so, disable the plot of the popup
             this.popupOutOfBounds = false;
-            let scrollableElement = document.getElementById("scrollable");
+            
             const topWidget = scrollableElement.offsetTop;
             const bottomWidget = scrollableElement.offsetTop + scrollableElement.offsetHeight;
 
@@ -250,92 +248,36 @@ export default class TreeComponent extends Vue {
 }
 </script>
 
-<style>
+<style lang="scss">
 #tree-component {
-    margin-bottom: 15px;
-}
-
-#scrollable {
-    overflow-y: scroll;
-    max-height: 60vh;
-    width: 100%;
-}
-
-ul#tree {
-    list-style-type: circle;
     background-color: white;
 }
 
-ul {
+#tree-component ul#tree {
+    list-style-type: circle;
+}
+
+#tree-component ul {
     padding-left: 0;
 }
 
-li {
+#tree-component li {
     list-style-type: none;
 }
 
-ul#path {
-    overflow: auto;
-    list-style-type: none;
-    margin: 5px 5px;
-}
-
-ul#path p {
-    font-size: 15px;
-}
-
-ul#path .separator {
-    margin: 0px 3px;
-}
-
-li.directory p.name {
-    float: left;
-    cursor: pointer;
-}
-
-li.directory p.name:hover {
-    text-decoration: underline;
-}
-
-li.directory p.separator {
-    float: left;
-}
-
-li.node {
+#tree-component li.node {
     border-top: 1px solid gainsboro;
     padding: 8px 10px;
 }
 
-li.node:hover {
+#tree-component li.node:hover {
     background-color: gainsboro;
     cursor: pointer;
 }
 
-#container-popup {
+#tree-component #container-popup {
     position: absolute;
     left: 100%;
     height: 100%;
-}
-
-#home {
-    position: relative;
-    float: left;
-    border: none;
-    background: rgba(250,250,250,0.8);
-    border-radius: 4px;
-    width: 24px;
-    height: 24px;
-    font-size: 16px;
-}
-
-#home i {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-}
-
-#home:hover {
-    background-color: darkgray;
 }
 </style>

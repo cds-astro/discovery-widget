@@ -5,12 +5,42 @@
     <QuitComponent v-on:quit="$emit('quit')"></QuitComponent>
     <h3 id="title">Collection Selection Tool</h3>
     <FilterComponent></FilterComponent>
-    <TreeComponent 
-        v-bind:tree="root"
-        v-bind:viewport="viewport">
-    </TreeComponent>
 
-    <SearchComponent v-on:filter="queryMOCServer($event)"></SearchComponent>
+    <!-- Path -->
+    <div id="wrap-path">
+        <div id="path">
+            <a id="home" v-on:click="
+                p = p.slice(0, 1);
+                currentNode = root.findNode(p);">
+                <i class="fa fa-home fa-lg"></i>
+            </a>
+            <ul>
+                <li v-for="i in p.length"
+                    v-on:click="
+                        p = p.slice(0, i);
+                        currentNode = root.findNode(p);
+                    ">
+                    <p class="name">{{ p[i - 1] }}</p>
+                    <p class="separator">/</p>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div id="tree" v-on:scroll="scrollY = $event.target.scrollTop">
+        <TreeComponent 
+            v-bind:tree="currentNode"
+            v-bind:viewport="viewport"
+            v-bind:scrollPositionY="scrollY"
+            v-on:addToPath="
+                p.push($event);
+                currentNode = root.findNode(p);">
+        </TreeComponent>
+    </div>
+
+    <div id="footer">
+        <SearchComponent v-on:filter="queryMOCServer($event)"></SearchComponent>
+    </div>
 </div>
 </template>
 
@@ -363,7 +393,12 @@ export default class WidgetComponent extends Vue {
 
     private root: Tree = new Tree('', null);
 
-   public mounted() {
+    private currentNode: Tree = this.root;
+    private p: string[] = [''];
+
+    private scrollY: number = 0;
+
+    public mounted() {
         console.log('Tree component MOUNTED'); 
         this.$root.$on('updateViewer', (args: any[]) => {
             const corners = args[0];
@@ -395,15 +430,6 @@ export default class WidgetComponent extends Vue {
 
             /* Update root so that it will be propagates through the tree component */
             this.root = filteredRoot;
-
-            //let headersToShow: HeaderDatasetType[] = [];
-            // VueJS does not accept Map objects
-            // We need to convert it to an array here. The conversion cannot either
-            // be done in the template because VueJS does not update the DOM.
-            //this.headersToShow = headersToShow;
-            //this.cataloguesToShow = cataloguesToShow;
-            //this.updateShowHeaders();
-            //this.init = false;
         });
 
         this.$root.$on('filterTree', (tables: HeaderResponse[]) => {
@@ -502,19 +528,83 @@ export default class WidgetComponent extends Vue {
     }
 }
 </script>
-<style>
+<style lang="scss">
 #widget-component {
     display: flex;
     flex-direction: column;
 
-    width:15%;
-    position:absolute;
-    top:40px;
-    left:40px;
+    width: 15%;
+    max-height: 70vh;
+
+    position: absolute;
+    top: 40px;
+    left: 40px;
+
     background-color: white;
-    color:black;
-    /*border: 1px solid gray;*/
-    /*padding: 5px;*/
+    color: black;
+
+    #wrap-path {
+        padding: 2px;
+
+        #path {
+            display: flex;
+            align-items: center;
+
+            ul {
+                list-style-type: none;
+                padding: 0;
+                margin: 5px 0px;
+                
+                p {
+                    font-size: 15px;
+                }
+
+                li p.name {
+                    cursor: pointer;
+                    float: left;
+                }
+
+                li p.name:hover {
+                    text-decoration: underline;
+                }
+
+                li p.separator {
+                    float: left;
+                    margin: 0px 3px;
+                }
+            }
+
+            #home {
+                position: relative;
+
+                border: none;
+                background: gainsboro;
+                border-radius: 2px;
+                width: 36px;
+                height: 36px;
+                font-size: 18px;
+
+                &:hover {
+                    background-color: lightgray;
+                }
+
+                i {
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                }
+            }   
+        }
+    }
+
+    #tree {
+        overflow-y: scroll;
+    }
+
+    #footer {
+        margin: 5px;
+    }
 }
 
 ul {
