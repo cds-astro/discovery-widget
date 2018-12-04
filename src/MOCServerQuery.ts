@@ -1,5 +1,6 @@
 import { Vue } from 'vue-property-decorator';
 import { Viewport } from './Viewport';
+import { Tag } from './components/Filter';
 
 abstract class MOCServer {
     public static URL: string = 'http://alasky.unistra.fr/MocServer/query?';
@@ -71,34 +72,45 @@ export class TreeViewportMOCServerQuery extends MOCServer {
 }
 
 export class TreeFilterMOCServerQuery extends MOCServer {
-    public static getUrl(filter: string): string {
+    public static getUrl(tags: Map<string, Tag>, keywords: string): string {
+        console.log('keywords', keywords);
         let url = MOCServer.URL +
         'get=record&' +
         'fmt=json&' +
         'fields=ID, obs_id, obs_title, client_category, dataproduct_type, vizier_popularity&' +
-        'casesensitive=false&' +
-        'expr=(dataproduct_type=image,catalog';
-        let filterUri = ')';
-
-        if (filter) {
-            const kws = filter.split(' ');
-            filterUri = '';
-            kws.forEach((kw) => {
-                filterUri += '&&(obs_title=*' + kw + '*||obs_id=*' + kw + '*||obs_collection=*' + kw + '*)';
-            });
-            filterUri += ')';
+        'casesensitive=false';
+        if (tags.size == 0 && !keywords) {
+            return url;
         }
-        url += encodeURIComponent(filterUri);
+
+        url += '&expr=('
+        let i = 0;
+        for (let [key, tag] of tags.entries()) {
+            if(i > 0) {
+                url += encodeURIComponent('&&');
+            }
+            url += encodeURIComponent(key) + encodeURIComponent(tag.operator) + encodeURIComponent(tag.value);
+            i++;
+        }
+
+        if (keywords) {
+            const kws = keywords.split(' ');
+            kws.forEach((kw) => {
+                url += encodeURIComponent('&&(obs_title=*' + kw + '*||obs_id=*' + kw + '*||obs_collection=*' + kw + '*)');
+            });
+        }
+        url += ')';
+
+        console.log('FITLER URL', url);
 
         return url;
     }
 
-    public static query(caller: any, filter: string): void {
-        const url = this.getUrl(filter);
+    public static query(caller: any, filter: Map<string, Tag>, keywords: string): void {
+        const url = this.getUrl(filter, keywords);
         MOCServer.query(url, caller, 'filterTree');
     }
 }
-
 
 export class RetrieveAllDatasetHeadersQuery extends MOCServer {
     public static getUrl(): string {

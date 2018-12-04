@@ -4,7 +4,15 @@
 <div id="widget-component" v-bind:style="{ top: offsetTop.toString() + 'px' }">
     <QuitComponent v-on:quit="$emit('quit')"></QuitComponent>
     <h3 id="title">Collection Selection Tool</h3>
-    <FilterComponent></FilterComponent>
+    <FilterComponent v-on:updateFilterTags="updateTags($event)"></FilterComponent>
+
+    <div id="filter-tags">
+        <ul>
+            <li v-for="tag in tagsList">
+                <p>{{ tag }}</p>
+            </li>
+        </ul>
+    </div>
 
     <!-- Path -->
     <div id="wrap-path">
@@ -39,7 +47,7 @@
     </div>
 
     <div id="footer">
-        <SearchComponent v-on:filter="queryMOCServer($event)"></SearchComponent>
+        <SearchComponent v-on:filter="keywords = $event; queryMOCServerOnFilter();"></SearchComponent>
     </div>
 </div>
 </template>
@@ -53,6 +61,7 @@ import TreeComponent from './Tree.vue';
 import { HeaderSelectionEvent } from './Collection.vue';
 import PopupComponent from './Popup.vue';
 import FilterComponent from './Filter.vue';
+import { Tag } from './Filter.vue';
 import { TreeViewportMOCServerQuery, TreeFilterMOCServerQuery, HeaderResponse } from './../MOCServerQuery';
 import { RetrieveAllDatasetHeadersQuery } from './../MOCServerQuery';
 import { Viewport } from './../Viewport';
@@ -348,6 +357,22 @@ export class Tree {
     }
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 @Component({
     name: 'widget-component',
     components: {
@@ -372,8 +397,8 @@ export default class WidgetComponent extends Vue {
     private cataloguesList: Array<Map<ID, HeaderDatasetType>> = [];
 
     // Used for debug purposes
-    private log: String = '';
-    private search_expr: string = '';
+    private log: string = '';
+    private keywords: string = '';
 
     private viewport : Viewport = new Viewport();
 
@@ -397,6 +422,10 @@ export default class WidgetComponent extends Vue {
     private p: string[] = [''];
 
     private scrollY: number = 0;
+
+    /* Filter tags */
+    private tags: Map<string, Tag> = new Map<string, Tag>();
+    private tagsList: Array<string> = [];
 
     public mounted() {
         console.log('Tree component MOUNTED'); 
@@ -505,9 +534,8 @@ export default class WidgetComponent extends Vue {
         }, 100);
     }
 
-    private queryMOCServer(content: string): void {
-        this.search_expr = content;
-        TreeFilterMOCServerQuery.query(this, content);
+    private queryMOCServerOnFilter(): void {
+        TreeFilterMOCServerQuery.query(this, this.tags, this.keywords);
     }
 
     private sliceHeaders(args: any) {
@@ -525,6 +553,21 @@ export default class WidgetComponent extends Vue {
             this.sliceBounds[0],
             this.sliceBounds[1]
         );
+    }
+
+    private updateTags(tags: Map<string, Tag>) {
+        /* Remove tags having a value == '' */
+        this.tags = new Map<string, Tag>(tags);
+        this.tagsList = [];
+        
+        for (let [key, tag] of this.tags.entries()) {
+            if (tag.repr.length > 0) {
+                this.tagsList.push(tag.repr);
+            } else {
+                this.tags.delete(key);
+            }
+        }
+        this.queryMOCServerOnFilter();
     }
 }
 </script>
