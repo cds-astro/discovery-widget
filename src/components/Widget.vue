@@ -167,6 +167,23 @@ export class Tree {
         this.numberCatalogs();
     }
 
+    public needToMoveToRoot(): boolean {
+        for (let i = 0; i < this.children.length; i++) {
+            const child = this.children[i];
+            if (child.numberOfCatalogs > 0) {
+                return false;
+            }
+        }
+
+        for (let i = 0; i < this.catalogsList.length; i++) {
+            if (this.catalogsToShow[i]) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     public viewport(tables: HeaderResponse[], tableToNode: Map<string, Tree>, tableToCat: Map<string, string>) {
         this.resetViewport();
 
@@ -479,6 +496,13 @@ export default class WidgetComponent extends Vue {
 
             /* Update root so that it will be propagates through the tree component */
             this.root = filteredRoot;
+
+            /* Move to root if there are no table in the current node */
+            console.log('current node', this.currentNode);
+            if (this.currentNode.needToMoveToRoot()) {
+                this.p = [''];
+                this.currentNode = this.root;
+            }
         });
 
         this.$root.$on('retrieveAllDatasetHeaders', (tables: HeaderResponse[]) => {
