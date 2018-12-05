@@ -4,12 +4,15 @@
 <div id="widget-component" v-bind:style="{ top: offsetTop.toString() + 'px' }">
     <QuitComponent v-on:quit="$emit('quit')"></QuitComponent>
     <h3 id="title">Collection Selection Tool</h3>
-    <FilterComponent v-on:updateFilterTags="updateTags($event)"></FilterComponent>
+    <FilterComponent v-on:updateFilterTags="updateTags($event.key, $event.tag)"></FilterComponent>
 
     <div id="filter-tags">
         <ul>
             <li v-for="tag in tagsList">
-                <p>{{ tag }}</p>
+                <p>{{ tag.repr }}</p>
+                <a @click="removeTag(tag)" class="delete-tag">
+                    <i class="fa fa-times fa-lg"></i>
+                </a>
             </li>
         </ul>
     </div>
@@ -425,7 +428,7 @@ export default class WidgetComponent extends Vue {
 
     /* Filter tags */
     private tags: Map<string, Tag> = new Map<string, Tag>();
-    private tagsList: Array<string> = [];
+    private tagsList: Array<Tag> = [];
 
     public mounted() {
         console.log('Tree component MOUNTED'); 
@@ -555,18 +558,34 @@ export default class WidgetComponent extends Vue {
         );
     }
 
-    private updateTags(tags: Map<string, Tag>) {
+    private updateTags(key: string, tag: Tag) {
         /* Remove tags having a value == '' */
-        this.tags = new Map<string, Tag>(tags);
-        this.tagsList = [];
-        
+        if (tag.repr.length == 0) {
+            this.tags.delete(key);
+        } else {
+            this.tags.set(key, tag);
+        }
+        this.tagsList = Array.from(this.tags.values());
+
+        console.log('updated tags', this.tags);
+
+        this.queryMOCServerOnFilter();
+    }
+
+    private removeTag(tagToRemove: Tag) {
+        let nextTagSet = new Map<string, Tag>(this.tags);
+
         for (let [key, tag] of this.tags.entries()) {
-            if (tag.repr.length > 0) {
-                this.tagsList.push(tag.repr);
-            } else {
-                this.tags.delete(key);
+            if (tag === tagToRemove) {
+                nextTagSet.delete(key);
+                break;
             }
         }
+
+        // erase old tag set with the new one
+        this.tags = nextTagSet;
+        this.tagsList = Array.from(this.tags.values());
+        
         this.queryMOCServerOnFilter();
     }
 }
@@ -647,6 +666,40 @@ export default class WidgetComponent extends Vue {
 
     #footer {
         margin: 5px;
+    }
+}
+
+#filter-tags {
+    ul {
+        margin: 0;
+        padding: 0;
+        li {
+            display: inline-block;
+            padding: 2px;
+
+            margin: 2px;
+            
+            background-color: whitesmoke;
+            border: 1px solid gainsboro;
+            color: black;
+
+            p {
+                font-size: 11px;
+                display: inline-block;
+            }
+
+            a.delete-tag {
+                display: inline-block;
+                border: 1px solid gainsboro;
+                
+                margin: 1px;
+            }
+
+            a.delete-tag:hover {
+                color: red;
+                cursor: pointer;
+            }
+        }
     }
 }
 

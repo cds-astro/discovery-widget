@@ -50,13 +50,18 @@
                    <i class="fas fa-image"></i>
                    <p>Type</p>
                 </div>
-                <select>
-                    <option value="0">Select collection type</option>
-                    <option value="1">Image</option>
-                    <option value="2">Catalog</option>
-                </select>
+                <ul class="checkbox-container">
+                    <li>
+                        <input id="image-checkbox" type="checkbox" v-bind:disabled="disableImageCheckbox" checked="checked" @click="addDataTypeFilterTag('image', $event.target.checked)">
+                        <label for="image-checkbox">Image</label>
+                    </li>
+                    <li>
+                        <input id="catalog-checkbox" type="checkbox" v-bind:disabled="disableCatalogCheckbox" checked="checked" @click="addDataTypeFilterTag('catalog', $event.target.checked)">
+                        <label for="catalog-checkbox">Catalog</label>
+                    </li>
+                </ul>
             </div>
-
+            
             <div class="metadata">
                 <div class="header">
                    <i class="fas fa-wrench"></i>
@@ -138,6 +143,11 @@ export default class FilterComponent extends Vue {
     private unit: string = 'eV';
     private em = this.data.get('eV');
 
+    private showImage: boolean = true;
+    private showCatalog: boolean = true;
+    private disableImageCheckbox: boolean = false;
+    private disableCatalogCheckbox: boolean = false;
+
     private options = {
         value: this.em.value,
         dotSize: 14,
@@ -184,7 +194,11 @@ export default class FilterComponent extends Vue {
         }
 
         this.tags.set(key, nextTag);
-        this.$emit('updateFilterTags', this.tags);
+        
+        this.$emit('updateFilterTags', {
+            key: key,
+            tag: nextTag,
+        });
     }
 
     private addDateFilterTag(val: Date, key: string) {
@@ -193,12 +207,16 @@ export default class FilterComponent extends Vue {
         tag.repr = tag.operator + val.toDateString();
 
         this.tags.set(key, tag);
-        this.$emit('updateFilterTags', this.tags);
+
+        this.$emit('updateFilterTags', {
+            key: key,
+            tag: tag,
+        });
     }
 
     private changeEmUnit(unit: string) {
         this.unit = unit;
-        console.log('UNIT', unit);
+
         this.em = this.data.get(unit);
         this.options.data = this.em.data;
         this.options.value = this.em.value;
@@ -243,7 +261,53 @@ export default class FilterComponent extends Vue {
         this.tags.set('em_min', tagEmMin);
         this.tags.set('em_max', tagEmMax);
 
-        this.$emit('updateFilterTags', this.tags);
+        this.$emit('updateFilterTags', {
+            key: 'em_min',
+            tag: tagEmMin,
+        });
+        this.$emit('updateFilterTags', {
+            key: 'em_max',
+            tag: tagEmMax,
+        });
+    }
+
+    private addDataTypeFilterTag(type: string, checked: boolean) {
+        if (type === 'image' && !this.disableImageCheckbox) {
+            this.showImage = checked;
+            if (!this.showImage) {
+                this.disableCatalogCheckbox = true;
+            }
+        } else if (type === 'catalog' && !this.disableCatalogCheckbox) {
+            this.showCatalog = checked;
+            if (!this.showCatalog) {
+                this.disableImageCheckbox = true;
+            }
+        }
+
+        let tagDataproductType = this.tags.get('dataproduct_type');
+
+        if (this.showCatalog && this.showImage) {
+            tagDataproductType.value = '*';
+            tagDataproductType.repr = '';
+
+            this.disableCatalogCheckbox = false;
+            this.disableImageCheckbox = false;
+        } else {
+            if (this.showCatalog) {
+                tagDataproductType.value = 'catalog';
+                tagDataproductType.repr = 'catalog';
+            } else if (this.showImage) {
+                tagDataproductType.value = 'image';
+                tagDataproductType.repr = 'image';
+            }
+        }
+
+        this.tags.set('dataproduct_type', tagDataproductType);
+
+        this.$emit('updateFilterTags', {
+            key: 'dataproduct_type',
+            tag: tagDataproductType,
+        });
     }
 }
 </script>
@@ -299,7 +363,7 @@ $pos-y-lang: 20px;
 #filter #form .metadata {
     padding: 25px 10px;
     display: flex;
-    justify-content: space-around;
+    //justify-content: space-around;
     align-items: center;
 
     border-bottom: 1px solid gainsboro;
@@ -312,10 +376,6 @@ $pos-y-lang: 20px;
         display: flex;
         
         align-items: center;
-
-        p {
-
-        }
 
         i {
             font-size:22px;
@@ -332,6 +392,16 @@ $pos-y-lang: 20px;
 
     #unit {
         width: 20%;
+    }
+
+    ul.checkbox-container {
+        li {
+            display: inline-block;
+
+            * {
+                display: inline-block;
+            }
+        }
     }
 }
 
