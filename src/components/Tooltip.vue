@@ -3,7 +3,9 @@
 <template>
     <div id="tooltip">
         <div v-if="type == 0" class="fa fa-question-circle question-icon" style="font-size:24px"></div>
-        <span class="tooltiptext"><p>{{ text }}</p></span>
+        <span class="tooltiptext" v-bind:style="{'width': width, 'height': height}">
+            <slot></slot>
+        </span>
     </div>
 </template>
 
@@ -20,15 +22,9 @@ enum MarkType {
 })
 export default class TooltipComponent extends Vue {
     @Prop() type!: MarkType;
-    @Prop() text!: string;
-    /*
-    @Watch('text')
-    public changeText(newText: string, oldText: string) {
-        // Find the node where the user is so that the tree does not cd to its root
-        this.text = newText;
-        console.log('new text', this.text);
-        this.$forceUpdate();
-    }*/
+
+    @Prop() width!: number;
+    @Prop() height!: number;
 
     public mounted() {
         console.log('Tooltip component MOUNTED');
@@ -36,7 +32,7 @@ export default class TooltipComponent extends Vue {
 }
 </script>
 
-<style>
+<style lang="scss">
 #tooltip {
     position: relative;
     border-bottom: 1px dotted black;
@@ -44,12 +40,12 @@ export default class TooltipComponent extends Vue {
 
 #tooltip .tooltiptext {
     visibility: hidden;
-    width: 120px;
-    background-color: steelblue;
-    color: #fff;
+    
+    background-color: white;
+    color: black;
     text-align: center;
-    border-radius: 6px;
-    padding: 5px;
+    border-radius: 2px;
+    padding: 10px;
 
     /* Position the tooltip */
     position: absolute;
@@ -60,20 +56,26 @@ export default class TooltipComponent extends Vue {
     transform: translate(0%, -50%);
     margin-left: 5px;
 
-    border: 1px solid white;
+    border: 1px solid gainsboro;
+
+    img {
+        width: 100%;
+        height: 100%;
+    }
 }
 
-#tooltip .tooltiptext::after {
+/*
+#tooltip .tooltiptext:after {
     content: " ";
     position: absolute;
     top: 50%;
-    right: 100%; /* To the left of the tooltip */
+    right: 100%;
     margin-top: -5px;
     border-width: 5px;
     border-style: solid;
-    border-color: transparent steelblue transparent transparent;
+    border-color: transparent red transparent transparent;
 }
-
+*/
 #tooltip:hover .tooltiptext {
     visibility: visible;
 }

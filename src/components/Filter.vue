@@ -33,12 +33,15 @@
                    <i class="fas fa-broadcast-tower"></i>
                     <p>Em</p>
                 </div>
-                <vue-slider ref="slider" v-bind="options" v-bind:width="'100%'"></vue-slider>
+                <vue-slider ref="slider" @callback="addEmFilterTag($event)" v-bind="options" v-bind:width="'100%'"></vue-slider>
                 <select id="unit" v-on:change="changeEmUnit($event.target.value);">
                     <option>eV</option>
                     <option>Hz</option>
                     <option>m</option>
                 </select>
+                <TooltipComponent v-bind:type="0" v-bind:width="'504px'" v-bind:height="'385px'">
+                    <img src="./../../images/A4C10.png"></img>
+                </TooltipComponent>
             </div>
 
 
@@ -73,6 +76,7 @@
 <script lang="ts">
 import { Vue, Prop, Component, Watch } from 'vue-property-decorator';
 import QuitComponent from './QuitIcon.vue';
+import TooltipComponent from './Tooltip.vue';
 import Datepicker from 'vuejs-datepicker';
 import vueSlider from 'vue-slider-component';
 import { dateToMJD } from './../utils';
@@ -100,6 +104,7 @@ type EmType = {
         QuitComponent,
         Datepicker,
         vueSlider,
+        TooltipComponent,
     },
 })
 export default class FilterComponent extends Vue {
@@ -118,49 +123,19 @@ export default class FilterComponent extends Vue {
 
     private data: Map<string, EmType> = new Map<string, EmType>([
         ['eV', {
-            value: ["10+2", "10+0"],
-            data: [
-            "10+8",
-            "10+6",
-            "10+4",
-            "10+2",
-            "10+0",
-            "10-2",
-            "10-4",
-            "10-6",
-            "10-8",
-            "10-10"],
+            value: ["10e+0", "10e+2"],
+            data: ["10e-10", "10e-8", "10e-6", "10e-4", "10e-2", "10e+0", "10e+2", "10e+4", "10e+6", "10e+8"],
         }],
         ['Hz', {
-            value: ["10+20", "10+10"],
-            data: [
-            "10+22",
-            "10+20",
-            "10+18",
-            "10+16",
-            "10+14",
-            "10+12",
-            "10+10",
-            "10+8",
-            "10+6",
-            "10+4"],
+            value: ["10+10", "10+20"],
+            data: ["10e+4", "10e+6", "10e+8", "10e+10", "10e+12", "10e+14", "10e+16", "10e+18", "10e+20", "10e+22"],
         }],
         ['m', {
-            value: ["10-10", "10-4"],
-            data: [
-            "10-14",
-            "10-12",
-            "10-10",
-            "10-8",
-            "10-6",
-            "10-4",
-            "10-2",
-            "10+0",
-            "10+2",
-            "10+4"],
+            value: ["10e-12", "10e-6"],
+            data: ["10e-14", "10e-12", "10e-10", "10e-8", "10e-6", "10e-4", "10e-2", "10e+0", "10e+2", "10e+4"],
         }],
     ]);
-
+    private unit: string = 'eV';
     private em = this.data.get('eV');
 
     private options = {
@@ -189,6 +164,8 @@ export default class FilterComponent extends Vue {
         ['dataproduct_type', new Tag('=', '*', '')],
         ['t_min', new Tag('>=', '0', '')],
         ['t_max', new Tag('<=', '100000', '')],
+        ['em_min', new Tag('>=', '1E-13', '')],
+        ['em_max', new Tag('<=', '1E4', '')],
     ]);
     private tags: Map<string, Tag> = new Map<string, Tag>(this.defaultTags);
 
@@ -220,11 +197,53 @@ export default class FilterComponent extends Vue {
     }
 
     private changeEmUnit(unit: string) {
+        this.unit = unit;
         console.log('UNIT', unit);
         this.em = this.data.get(unit);
         this.options.data = this.em.data;
         this.options.value = this.em.value;
         this.options.formatter = "{value} " + unit;
+    }
+
+    private addEmFilterTag(values: Array<string>) {
+        let em_min = {
+            val: +values[0],
+            label: values[0],
+        }
+        let em_max = {
+            val: +values[1],
+            label: values[1],
+        }
+
+        // Check the unit and if necessary, convert to meters.
+        const c = 299792458.0;
+        if (this.unit === 'eV') {
+            const h = 4.135667516*10e-15;
+            em_min.val = h*c / em_min.val;
+            em_max.val = h*c / em_max.val;
+        } else if (this.unit === 'Hz') {
+            em_min.val = c / em_min.val;
+            em_max.val = c / em_max.val;
+        }
+
+        if (em_min.val > em_max.val) {
+            const tmp = em_min;
+            em_min = em_max;
+            em_max = tmp;
+        }
+
+        let tagEmMin = this.tags.get('em_min');
+        tagEmMin.value = em_min.val.toString();
+        tagEmMin.repr = tagEmMin.operator + em_min.val.toExponential(3).toString() + ' m';
+
+        let tagEmMax = this.tags.get('em_max');
+        tagEmMax.value = em_max.val.toString();
+        tagEmMax.repr = tagEmMax.operator + em_max.val.toExponential(3).toString() + ' m';
+
+        this.tags.set('em_min', tagEmMin);
+        this.tags.set('em_max', tagEmMax);
+
+        this.$emit('updateFilterTags', this.tags);
     }
 }
 </script>

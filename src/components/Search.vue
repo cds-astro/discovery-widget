@@ -13,7 +13,9 @@
                 "
                 v-bind:value="search" placeholder="Search..." />
         </div>
-        <TooltipComponent v-bind:type="0" v-bind:text="'Search for specific collections by typing keywords (e.g. SDSS or AllWISE)'"></TooltipComponent>
+        <TooltipComponent v-bind:type="0" v-bind:width="'150px'" v-bind:height="'70px'"> 
+            <p>Search for specific collections by typing keywords (e.g. SDSS or AllWISE)</p>
+        </TooltipComponent>
     </div>
 </template>
 

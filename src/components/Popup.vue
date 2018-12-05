@@ -197,7 +197,7 @@ img {
 }
 
 img:before {
-  background-image: url("./../../thumbnail.jpeg");
+  background-image: url("./../../images/thumbnail.jpeg");
   background-repeat: no-repeat;
   background-position: center;
   background-size: 100px 100px;
