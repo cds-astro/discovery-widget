@@ -5,12 +5,7 @@
         <p>Keywords: </p>
         <div class="wrap">
             <input
-                v-on:input="
-                    search=$event.target.value
-                    // Call the filter method and send its result
-                    // to the tree component.
-                    $emit('filter', search)
-                "
+                v-on:input="addKeywordsTag($event.target.value)"
                 v-bind:value="search" placeholder="Search..." />
         </div>
         <TooltipComponent v-bind:type="0" v-bind:width="'150px'" v-bind:height="'70px'"> 
@@ -22,6 +17,7 @@
 <script lang="ts">
 import { Vue, Prop, Component, Watch } from 'vue-property-decorator';
 import TooltipComponent from './Tooltip.vue';
+import { Tag } from './Filter.vue';
 
 @Component({
     name: 'search-component',
@@ -34,6 +30,15 @@ export default class SearchComponent extends Vue {
 
     public mounted() {
         console.log('Search component MOUNTED');
+    }
+
+    public addKeywordsTag(val: string) {
+        let tag = new Tag('=', val, val);
+        
+        this.$emit('updateFilterTags', {
+            key: 'keywords',
+            tag: tag,
+        });
     }
 }
 </script>

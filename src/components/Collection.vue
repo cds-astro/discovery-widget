@@ -166,7 +166,13 @@ export default class CollectionComponent extends Vue {
 }
 #collection-component div.header {
     padding: 5px;
+    background-color: whitesmoke;
 }
+#collection-component h4 {
+    text-align: center;
+    margin: 5px 0px;
+}
+
 #collection-component h4, #collection-component p {
     word-wrap: break-word;
 }

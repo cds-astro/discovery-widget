@@ -5,9 +5,10 @@
     <QuitComponent v-on:quit="$emit('quit')"></QuitComponent>
     <h3 id="title">Collection Selection Tool</h3>
     <FilterComponent v-bind:deletedTag="deletedTag" v-on:updateFilterTags="updateTags($event.key, $event.tag)">
+        ({{ root.numberOfCatalogs }}) datasets
     </FilterComponent>
 
-    <div id="filter-tags">
+    <div v-show="tagsList.length > 0" id="filter-tags">
         <ul>
             <li v-for="tag in tagsList">
                 <p>{{ tag.repr }}</p>
@@ -16,7 +17,6 @@
                 </a>
             </li>
         </ul>
-        <p>{{ root.numberOfCatalogs }} matching datasets</p>
     </div>
 
     <!-- Path -->
@@ -52,7 +52,7 @@
     </div>
 
     <div id="footer">
-        <SearchComponent v-on:filter="keywords = $event; queryMOCServerOnFilter();"></SearchComponent>
+        <SearchComponent v-on:updateFilterTags="updateTags($event.key, $event.tag)"></SearchComponent>
     </div>
 </div>
 </template>
@@ -442,7 +442,6 @@ export default class WidgetComponent extends Vue {
 
     // Used for debug purposes
     private log: string = '';
-    private keywords: string = '';
 
     private viewport : Viewport = new Viewport();
 
@@ -602,7 +601,7 @@ export default class WidgetComponent extends Vue {
     }
 
     private queryMOCServerOnFilter(): void {
-        TreeFilterMOCServerQuery.query(this, this.tags, this.keywords);
+        TreeFilterMOCServerQuery.query(this, this.tags);
     }
 
     private sliceHeaders(args: any) {
@@ -674,6 +673,7 @@ export default class WidgetComponent extends Vue {
 
     #wrap-path {
         padding: 2px;
+        border-top: 1px solid gainsboro;
 
         #path {
             display: flex;
@@ -770,8 +770,7 @@ export default class WidgetComponent extends Vue {
             }
         }
     }
-
-    border-bottom: 1px solid gainsboro;
+    border-top: 1px solid gainsboro;
 }
 
 ul {

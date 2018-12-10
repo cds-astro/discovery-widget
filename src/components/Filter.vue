@@ -5,13 +5,14 @@
         <div @click="showForm = !showForm" id="icon">
             <i class="fas fa-filter"></i>
             <p>Filter</p>
+            <p class="num-datasets"><slot></slot></p>
         </div>
         <div v-show="showForm" id="form">
             <QuitComponent v-on:quit="showForm=false"></QuitComponent>
 
             <div class="metadata">
                 <div class="header">
-                    <i class="fa fa-wifi fa-1x"></i>
+                    <i class="fa fa-wifi fa-2x"></i>
                     <p>Bandwidth</p>
                 </div>
                 
@@ -23,7 +24,7 @@
 
             <div class="metadata">
                 <div class="header">
-                    <i class="fa fa-calendar"></i>
+                    <i class="fa fa-calendar fa-2x"></i>
                     <p>Date</p>
                 </div>
                 
@@ -412,7 +413,6 @@ $pos-y-lang: 20px;
 #filter #icon {
     padding: 10px;
     border-top: 1px solid gainsboro;
-    border-bottom: 1px solid gainsboro;
 
     * {
         display: inline;
@@ -420,6 +420,11 @@ $pos-y-lang: 20px;
 
     p {
         margin: 0px 5px;
+    }
+
+    p.num-datasets {
+        float: right;
+        color: green;
     }
 }
 

@@ -122,14 +122,14 @@ export class TreeViewportMOCServerQuery extends MOCServer {
 }
 
 export class TreeFilterMOCServerQuery extends MOCServer {
-    public static getUrl(tags: Map<string, Tag>, keywords: string): string {
-        console.log('keywords', keywords);
+    public static getUrl(tags: Map<string, Tag>): string {
+
         let url = MOCServer.URL +
         'get=record&' +
         'fmt=json&' +
         'fields=ID, obs_id, obs_title, client_category, dataproduct_type, vizier_popularity&' +
         'casesensitive=false';
-        if (tags.size == 0 && !keywords) {
+        if (tags.size == 0) {
             return url;
         }
 
@@ -139,30 +139,29 @@ export class TreeFilterMOCServerQuery extends MOCServer {
             if(i > 0) {
                 url += encodeURIComponent('&&');
             }
-            url += '(' + encodeURIComponent(key) + encodeURIComponent(tag.operator) + encodeURIComponent(tag.value) + '||' + encodeURIComponent(key) + '!=*' + ')';
+            if(key === "keywords") {
+                const kws = tag.value.split(' ');
+                for(let j = 0; j < kws.length; j++) {
+                    let kw = kws[j];
+                    if(j == 0) {
+                        url += encodeURIComponent('(obs_title=*' + kw + '*||obs_id=*' + kw + '*||obs_collection=*' + kw + '*)');
+                    } else {
+                        url += encodeURIComponent('&&(obs_title=*' + kw + '*||obs_id=*' + kw + '*||obs_collection=*' + kw + '*)');
+                    }
+                }
+            } else {
+                url += '(' + encodeURIComponent(key) + encodeURIComponent(tag.operator) + encodeURIComponent(tag.value) + '||' + encodeURIComponent(key) + '!=*' + ')';
+            }
             i++;
         }
-
-        if (keywords) {
-            const kws = keywords.split(' ');
-            for(let j = 0; j < kws.length; j++) {
-                let kw = kws[j];
-                if(tags.size == 0 && j == 0) {
-                    url += encodeURIComponent('(obs_title=*' + kw + '*||obs_id=*' + kw + '*||obs_collection=*' + kw + '*)');
-                } else {
-                    url += encodeURIComponent('&&(obs_title=*' + kw + '*||obs_id=*' + kw + '*||obs_collection=*' + kw + '*)');
-                }
-            }
-        }
-        url += '';
 
         console.log('FITLER URL', url);
 
         return url;
     }
 
-    public static query(caller: any, filter: Map<string, Tag>, keywords: string): void {
-        const url = this.getUrl(filter, keywords);
+    public static query(caller: any, filter: Map<string, Tag>): void {
+        const url = this.getUrl(filter);
         MOCServer.query(url, caller, 'filterTree');
     }
 }
