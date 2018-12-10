@@ -4,7 +4,8 @@
 <div id="widget-component" v-bind:style="{ top: offsetTop.toString() + 'px' }">
     <QuitComponent v-on:quit="$emit('quit')"></QuitComponent>
     <h3 id="title">Collection Selection Tool</h3>
-    <FilterComponent v-on:updateFilterTags="updateTags($event.key, $event.tag)"></FilterComponent>
+    <FilterComponent v-bind:deletedTag="deletedTag" v-on:updateFilterTags="updateTags($event.key, $event.tag)">
+    </FilterComponent>
 
     <div id="filter-tags">
         <ul>
@@ -15,6 +16,7 @@
                 </a>
             </li>
         </ul>
+        <p>{{ root.numberOfCatalogs }} matching datasets</p>
     </div>
 
     <!-- Path -->
@@ -65,7 +67,7 @@ import { HeaderSelectionEvent } from './Collection.vue';
 import PopupComponent from './Popup.vue';
 import FilterComponent from './Filter.vue';
 import { Tag } from './Filter.vue';
-import { TreeViewportMOCServerQuery, TreeFilterMOCServerQuery, HeaderResponse } from './../MOCServerQuery';
+import { TreeViewportMOCServerQuery, TreeFilterMOCServerQuery, HeaderResponse, createDatasetName } from './../MOCServerQuery';
 import { RetrieveAllDatasetHeadersQuery } from './../MOCServerQuery';
 import { Viewport } from './../Viewport';
 import { isNullOrUndefined, isNull } from 'util';
@@ -127,40 +129,30 @@ export class Tree {
                 break;
             }
         }
+
         return currentNode;
-        /*
-        if (this.ID === path[0]) {
-            if (path.length === 1) {
-                return this;
-            }
-            const pathChild = path.slice(1);
-            for (let i = 0; i < this.children.length; ++i) {
-                const child = this.children[i];
-                const node = child.findNode(pathChild);
-                if (!isNullOrUndefined(node)) {
-                    return node;
-                }
-            }
-        }
-        */
     }
 
     public filter(tables: HeaderResponse[], tableToNode: Map<string, Tree>, tableToCat: Map<string, string>) {
         this.resetFiltering(); 
         tables.forEach(table => {
-           const node = tableToNode.get(table.ID);
-           const catID = tableToCat.get(table.ID);
-            if (!isNullOrUndefined(node) && !isNullOrUndefined(catID)) {
-               const cat = node.catalogs.get(catID);
-                if (!isNullOrUndefined(cat)) {
-                   const tableToShow = cat.get(table.ID);
-                    if (!isNullOrUndefined(tableToShow)) {
-                        tableToShow.filtered = true; 
-                       const id = node.catalogsList.indexOf(cat);
-                        node.catalogsToShow[id] = true;
+
+                let name = createDatasetName(table);
+                const node = tableToNode.get(name.dataset);
+                const catID = tableToCat.get(name.dataset);
+
+                if (!isNullOrUndefined(node) && !isNullOrUndefined(catID)) {
+                    const cat = node.catalogs.get(catID);
+                    if (!isNullOrUndefined(cat)) {
+                    const tableToShow = cat.get(name.dataset);
+                        if (!isNullOrUndefined(tableToShow)) {
+                            tableToShow.filtered = true; 
+                            const id = node.catalogsList.indexOf(cat);
+                            node.catalogsToShow[id] = true;
+                        }
                     }
                 }
-            }
+
         });
 
         // Compute the new number of catalogs per node
@@ -189,12 +181,14 @@ export class Tree {
 
         tables.forEach(table => {
             // Retrieve the catalogue with respect to the table
-           const node = tableToNode.get(table.ID);
-           const catID = tableToCat.get(table.ID);
+            let name = createDatasetName(table);
+
+            const node = tableToNode.get(name.dataset);
+            const catID = tableToCat.get(name.dataset);
             if (!isNullOrUndefined(node) && !isNullOrUndefined(catID)) {
                const cat = node.catalogs.get(catID);
                 if (!isNullOrUndefined(cat)) {
-                   const tableInViewport = cat.get(table.ID);
+                   const tableInViewport = cat.get(name.dataset);
                     if (tableInViewport) {
                         tableInViewport.inViewport = true;
                     }
@@ -239,8 +233,8 @@ export class Tree {
         }
 
         for (let i = 0; i < this.children.length; ++i) {
-           const child = this.children[i];
-           const childInViewport = child.checkInViewport();
+            const child = this.children[i];
+            const childInViewport = child.checkInViewport();
             inViewport = inViewport || childInViewport;
         }
 
@@ -254,7 +248,7 @@ export class Tree {
         } else {
             for (let i = 0; i < this.children.length; ++i) {
                 const child = this.children[i];
-               const result = child.find(ID);
+                const result = child.find(ID);
                 if (!isNullOrUndefined(result)) {
                     return result;
                 }
@@ -262,27 +256,12 @@ export class Tree {
         }
     }
 
-    public addTable(tableID: string, tableHeader: HeaderDatasetType, tableToNode: Map<string, Tree>) {
-        // Client category gives the tree path. Otherwise (e.g. for vizier tables), one can
-        // construct the path directly by looking its ID.
-        if (isNullOrUndefined(tableHeader.client_category)) {
-            // In the case there is no client_category then we construct the path from its ID
-            // and remove the last 'catID/tableID' from it because the Map the of catalogs will be stored
-            // in the catalogs field.
-            const categories = tableID.split('/');
-            tableHeader.client_category = categories.slice(0, categories.length - 2).join('/');
-        } 
-        const client_category = tableHeader.client_category;
-
-        const categories = client_category.split('/');
-        const leaf = (categories.length == 1) && !categories[0];
+    public addTable(path: string[], catalogName: string, datasetName: string, dataset: HeaderDatasetType, tableToNode: Map<string, Tree>) {
+        const leaf = (path.length == 1);
 
         if (!leaf) {
-            const id = categories[0];
-
-            const childClientCategory = categories.slice(1).join('/');
-            // update the client_category to remove what's in front of the first '/'
-            tableHeader.client_category = childClientCategory;
+            const id = path[0];
+            const pathChild = path.slice(1);
 
             let existingChild = this.getChild(id);
             if (isNull(existingChild)) {
@@ -290,32 +269,93 @@ export class Tree {
                 this.children.push(existingChild);
             }
 
-            existingChild.addTable(tableID, tableHeader, tableToNode);
+            existingChild.addTable(pathChild, catalogName, datasetName, dataset, tableToNode);
         } else {
             // We are in a leaf
-            let catID = '';
-            if (tableID) {
-                const beginTableIndex = tableID.lastIndexOf('/');
-                catID = tableID.substr(0, beginTableIndex);
-            }
-
-            if (!this.catalogs.has(catID)) {
+            if (!this.catalogs.has(catalogName)) {
                 const newCatalog = new Map<ID, HeaderDatasetType>([
-                    [tableID, tableHeader ,]
+                    [datasetName, dataset],
                 ]);
 
-                this.catalogs.set(catID, newCatalog);
+                this.catalogs.set(catalogName, newCatalog);
 
                 this.catalogsList.push(newCatalog);
                 this.catalogsToShow.push(true);
             } else {
-               const cat = this.catalogs.get(catID);
+                const cat = this.catalogs.get(catalogName);
                 if (cat) {
-                    cat.set(tableID, tableHeader);
+                    cat.set(datasetName, dataset);
                 }
             }
+            
+            tableToNode.set(datasetName, this);
+        }
+    }
 
-            tableToNode.set(tableID, this);
+    public IdLesserThan(id1: string, id2: string) {
+        let a = id1.match(/\d/g);
+        let b = id2.match(/\d/g);
+        
+        if (isNullOrUndefined(a) && !isNullOrUndefined(b)) {
+            return true;
+        } else if (!isNullOrUndefined(a) && isNullOrUndefined(b)) {
+            return false;
+        } else if (isNullOrUndefined(a) && isNullOrUndefined(b)) {
+            return id1 < id2;
+        }
+
+        let n1 = +(a.join(""));
+        let n2 = +(b.join(""));
+
+        return n1 < n2;
+    }
+
+    public mergeSort(input: Tree[]): Tree[] {
+        if(input.length == 1) {
+            return input;
+        } 
+
+        const middleIndex = Math.floor(input.length / 2);
+
+        let tab1 = this.mergeSort(input.slice(0, middleIndex));
+        let tab2 = this.mergeSort(input.slice(middleIndex));
+
+        let result = [];
+        let id1 = 0;
+        let id2 = 0;
+        while (result.length < input.length) {
+            if (id1 == tab1.length) {
+                result.push(tab2[id2]);
+                id2 += 1;
+            } else if(id2 == tab2.length) {
+                result.push(tab1[id1]);
+                id1 += 1;
+            } else {
+                if (this.IdLesserThan(tab1[id1].ID, tab2[id2].ID)) {
+                    result.push(tab1[id1]);
+                    id1 += 1;
+                } else {
+                    result.push(tab2[id2]);
+                    id2 += 1;
+                }
+            }
+        }
+
+        return result;
+    }
+
+    public sort() {
+        let children = this.children;
+        if (children.length == 0) {
+            return;
+        }
+
+        const sortedChildren = this.mergeSort(children);
+        this.children = sortedChildren;
+
+        for (let i = 0; i < this.children.length; ++i) {
+            let child = this.children[i];
+            child.sort();
         }
     }
 
@@ -377,22 +417,6 @@ export class Tree {
     }
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 @Component({
     name: 'widget-component',
     components: {
@@ -446,6 +470,7 @@ export default class WidgetComponent extends Vue {
     /* Filter tags */
     private tags: Map<string, Tag> = new Map<string, Tag>();
     private tagsList: Array<Tag> = [];
+    private deletedTag: string = '';
 
     public mounted() {
         console.log('Tree component MOUNTED'); 
@@ -479,37 +504,42 @@ export default class WidgetComponent extends Vue {
 
             /* Update root so that it will be propagates through the tree component */
             this.root = filteredRoot;
+            this.root.numberCatalogs();
         });
 
         this.$root.$on('filterTree', (tables: HeaderResponse[]) => {
             console.log('Filter tree triggered!');
 
             /* Shallow copy of root: the objects within root are copied as references */
+            /*
             const filteredRoot = new Tree(this.root.ID, this.root.parent);
             filteredRoot.children = this.root.children;
             filteredRoot.catalogs = this.root.catalogs;
             filteredRoot.catalogsList = this.root.catalogsList;
             filteredRoot.catalogsToShow = this.root.catalogsToShow;
-
-            filteredRoot.filter(tables, this.tableToNode, this.tableToCat);
-            filteredRoot.checkInViewport();
+*/
+            console.log('AA');
+            this.root.filter(tables, this.tableToNode, this.tableToCat);
+            this.root.checkInViewport();
+            console.log('TT');
 
             /* Update root so that it will be propagates through the tree component */
-            this.root = filteredRoot;
+            //this.root = filteredRoot;
 
             /* Move to root if there are no table in the current node */
-            console.log('current node', this.currentNode);
             if (this.currentNode.needToMoveToRoot()) {
                 this.p = [''];
                 this.currentNode = this.root;
             }
+
+            /* Get the number of resulting catalogs */
+            this.root.numberCatalogs();
         });
 
         this.$root.$on('retrieveAllDatasetHeaders', (tables: HeaderResponse[]) => {
             tables.forEach(table => {
                 /* Constructs the catalogues here */
-                const tableID = table.ID;
-                const tableHeader: HeaderDatasetType = {
+                let dataset: HeaderDatasetType = {
                     ID: table.ID,
                     obs_id: table.obs_id,
                     obs_title: table.obs_title,
@@ -519,17 +549,27 @@ export default class WidgetComponent extends Vue {
                     filtered: true,
                     vizier_popularity: table.vizier_popularity,
                 };
+
+                let name = createDatasetName(dataset);
                 /* Construct the tree by adding its client category */
-                this.root.addTable(tableID, tableHeader, this.tableToNode); 
+                // Client category gives the tree path. Otherwise (e.g. for vizier tables), one can
+                // construct the path directly by looking its ID.
+                
+                this.root.addTable(name.dataset.split('/'), name.catalog, name.dataset, dataset, this.tableToNode);
                 /* Update tableToCat and headers*/
+                /*
                 let catID = '';
                 if (tableID) {
                     const beginTableIndex = tableID.lastIndexOf('/');
                     catID = tableID.substr(0, beginTableIndex);
                 }
-                this.tableToCat.set(tableID, catID);
-                //this.headers.set(tableID, tableHeader);
+                */
+                this.tableToCat.set(name.dataset, name.catalog);
             });
+
+            console.log('SORT BEGIN');
+            this.root.sort();
+            console.log('SORT END');
 
             // Compute the number of catalogs
             this.root.numberCatalogs();
@@ -602,6 +642,8 @@ export default class WidgetComponent extends Vue {
         for (let [key, tag] of this.tags.entries()) {
             if (tag === tagToRemove) {
                 nextTagSet.delete(key);
+                this.deletedTag = key;
+                this.$nextTick(() => (this.deletedTag = ''));
                 break;
             }
         }
@@ -619,7 +661,7 @@ export default class WidgetComponent extends Vue {
     display: flex;
     flex-direction: column;
 
-    width: 15%;
+    width: 300px;
     max-height: 70vh;
 
     position: absolute;
@@ -628,6 +670,7 @@ export default class WidgetComponent extends Vue {
 
     background-color: white;
     color: black;
+    border: 1px solid gray;
 
     #wrap-path {
         padding: 2px;
@@ -686,6 +729,8 @@ export default class WidgetComponent extends Vue {
 
     #tree {
         overflow-y: scroll;
+        border-top: 1px solid gray;
+        border-bottom: 1px solid gray;
     }
 
     #footer {
@@ -725,6 +770,8 @@ export default class WidgetComponent extends Vue {
             }
         }
     }
+
+    border-bottom: 1px solid gainsboro;
 }
 
 ul {

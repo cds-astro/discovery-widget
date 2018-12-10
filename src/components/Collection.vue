@@ -43,6 +43,7 @@ export interface HeaderSelectionEvent {
 })
 export default class CollectionComponent extends Vue {
     @Prop() public catalog!: Map<ID, HeaderDatasetType>;
+    @Prop() public directory!: string;
 
     private tables: HeaderDatasetType[] = [];
 
@@ -114,9 +115,7 @@ export default class CollectionComponent extends Vue {
         if (this.isVizierCatalog()) {
             return this.catalogName;
         } else {
-            const tableID = Array.from(this.catalog.keys())[0];
-            const beginTableIndex = tableID.lastIndexOf('/');
-            return tableID.substr(0, beginTableIndex);
+            return this.directory;
         }
     }
 

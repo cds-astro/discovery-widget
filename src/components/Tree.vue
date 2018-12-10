@@ -35,6 +35,7 @@
                     v-if="root.catalogsToShow[i - 1]">
                     <CollectionComponent ref="childComponent"
                         v-bind:catalog="root.catalogsList[i - 1]"
+                        v-bind:directory="tree.ID"
                         v-on:toggle-popup="hoverCollection($event)"
                         v-on:hide-popup="leaveCollection()"
                         v-on:click.native="selectCollection()"
@@ -49,6 +50,7 @@
                     v-if="root.catalogsToShow[i - 1]">
                     <CollectionComponent ref="childComponent"
                         v-bind:catalog="root.catalogsList[i - 1]"
+                        v-bind:directory="tree.ID"
                         v-on:toggle-popup="hoverCollection($event)"
                         v-on:hide-popup="leaveCollection()"
                         v-on:click.native="selectCollection()"

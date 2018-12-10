@@ -1,6 +1,7 @@
 import { Vue } from 'vue-property-decorator';
 import { Viewport } from './Viewport';
-import { Tag } from './components/Filter';
+import { Tag } from './components/Filter.vue';
+import { isNullOrUndefined } from 'util';
 
 abstract class MOCServer {
     public static URL: string = 'http://alasky.unistra.fr/MocServer/query?';
@@ -53,6 +54,55 @@ export interface HeaderResponse {
     vizier_popularity: number;
 }
 
+function firstLetterToUppercase(word: string): string {
+    return word[0].toUpperCase() + word.slice(1);
+}
+
+export function createDatasetName(dataset: HeaderResponse): {dataset: string, catalog: string} {
+    let name = {
+        dataset: '',
+        catalog: '',
+    };
+
+    /* Specific dataset exceptions */
+    if (dataset.ID === 'CDS/Simbad') {
+        name.dataset = 'Simbad/Simbad';
+        name.catalog = 'Simbad';
+        return name;
+    }
+    
+    const hasClientCategory = !isNullOrUndefined(dataset.client_category);
+
+    if (!hasClientCategory) {
+        let dataproduct_type = dataset.dataproduct_type;
+        if (isNullOrUndefined(dataproduct_type)) {
+            dataproduct_type = 'Others';
+        }
+        name.dataset = firstLetterToUppercase(dataproduct_type) + '/' + dataset.ID.split('/').slice(1).join('/');
+        const end = name.dataset.lastIndexOf('/');
+        name.catalog = name.dataset.substr(0, end);
+    } else {
+        name.catalog = dataset.client_category;
+        let firstWord = name.catalog.split('/')[0];
+        if (firstWord !== 'Image' && firstWord !== 'Catalog') {
+            let dataproduct_type = dataset.dataproduct_type;
+            if (isNullOrUndefined(dataproduct_type)) {
+                dataproduct_type = 'Others';
+            }
+            name.catalog = firstLetterToUppercase(dataproduct_type) + '/' + name.catalog;
+        }
+
+        const end = dataset.ID.lastIndexOf('/');
+        name.dataset = name.catalog + '/' + dataset.ID.substr(end + 1);
+    }
+
+    /* Replace P with Others */
+    name.catalog = name.catalog.replace('/P/', '/Others/');
+    name.dataset = name.dataset.replace('/P/', '/Others/');
+
+    return name;
+} 
+
 export class TreeViewportMOCServerQuery extends MOCServer {
     public static getUrl(vp: Viewport): string {
         let url = MOCServer.URL +
@@ -83,23 +133,28 @@ export class TreeFilterMOCServerQuery extends MOCServer {
             return url;
         }
 
-        url += '&expr=('
+        url += '&expr='
         let i = 0;
         for (let [key, tag] of tags.entries()) {
             if(i > 0) {
                 url += encodeURIComponent('&&');
             }
-            url += encodeURIComponent(key) + encodeURIComponent(tag.operator) + encodeURIComponent(tag.value);
+            url += '(' + encodeURIComponent(key) + encodeURIComponent(tag.operator) + encodeURIComponent(tag.value) + '||' + encodeURIComponent(key) + '!=*' + ')';
             i++;
         }
 
         if (keywords) {
             const kws = keywords.split(' ');
-            kws.forEach((kw) => {
-                url += encodeURIComponent('&&(obs_title=*' + kw + '*||obs_id=*' + kw + '*||obs_collection=*' + kw + '*)');
-            });
+            for(let j = 0; j < kws.length; j++) {
+                let kw = kws[j];
+                if(tags.size == 0 && j == 0) {
+                    url += encodeURIComponent('(obs_title=*' + kw + '*||obs_id=*' + kw + '*||obs_collection=*' + kw + '*)');
+                } else {
+                    url += encodeURIComponent('&&(obs_title=*' + kw + '*||obs_id=*' + kw + '*||obs_collection=*' + kw + '*)');
+                }
+            }
         }
-        url += ')';
+        url += '';
 
         console.log('FITLER URL', url);
 

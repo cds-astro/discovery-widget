@@ -13,7 +13,7 @@
                     <p>Bandwidth</p>
                 </div>
                 
-                <select v-on:change="addFilterTag($event.target.value, 'obs_regime')">
+                <select ref="regimeSelector" v-on:change="addFilterTag($event.target.value, 'obs_regime')">
                     <option value="">Select bandwidth</option>
                     <option v-for="i in bandwidthList.length">{{ bandwidthList[i - 1] }}</option>
                 </select>
@@ -24,8 +24,20 @@
                     <i class="fa fa-calendar"></i>
                     <p>Date</p>
                 </div>
-                <datepicker class="date-picker" @selected="addDateFilterTag($event, 't_min')" :value="dates.min" :format="'dd MM yyyy'"></datepicker>
-                <datepicker class="date-picker" @selected="addDateFilterTag($event, 't_max')" :value="dates.max" :format="'dd MM yyyy'"></datepicker>
+                <datepicker ref="tminDatePicker" class="date-picker" calendar-class="calendar"
+                    @selected="addDateFilterTag($event, 't_min')"
+                    :minimumView="'month'" :maximumView="'year'" :initialView="'year'"
+                    :value="dates.min"
+                    :format="'MM dd yyyy'"
+                    :typeable="true"
+                    :placeholder="'MM-DD-YYYY'"></datepicker>
+                <datepicker ref="tmaxDatePicker" class="date-picker" calendar-class="calendar"
+                    @selected="addDateFilterTag($event, 't_max')"
+                    :minimumView="'month'" :maximumView="'year'" :initialView="'year'"
+                    :value="dates.max"
+                    :format="'MM dd yyyy'"
+                    :typeable="true"
+                    :placeholder="'MM-DD-YYYY'"></datepicker>
             </div>
 
             <div class="metadata">
@@ -44,7 +56,6 @@
                 </TooltipComponent>
             </div>
 
-
             <div class="metadata">
                 <div class="header">
                    <i class="fas fa-image"></i>
@@ -52,11 +63,11 @@
                 </div>
                 <ul class="checkbox-container">
                     <li>
-                        <input id="image-checkbox" type="checkbox" v-bind:disabled="disableImageCheckbox" checked="checked" @click="addDataTypeFilterTag('image', $event.target.checked)">
+                        <input ref="imageCheckbox" id="image-checkbox" type="checkbox" v-bind:disabled="disableImageCheckbox" checked="checked" @click="addDataTypeFilterTag('image', $event.target.checked)">
                         <label for="image-checkbox">Image</label>
                     </li>
                     <li>
-                        <input id="catalog-checkbox" type="checkbox" v-bind:disabled="disableCatalogCheckbox" checked="checked" @click="addDataTypeFilterTag('catalog', $event.target.checked)">
+                        <input ref="catalogCheckbox" id="catalog-checkbox" type="checkbox" v-bind:disabled="disableCatalogCheckbox" checked="checked" @click="addDataTypeFilterTag('catalog', $event.target.checked)">
                         <label for="catalog-checkbox">Catalog</label>
                     </li>
                 </ul>
@@ -85,6 +96,7 @@ import TooltipComponent from './Tooltip.vue';
 import Datepicker from 'vuejs-datepicker';
 import vueSlider from 'vue-slider-component';
 import { dateToMJD } from './../utils';
+import { isNullOrUndefined, isNull } from 'util';
 
 export class Tag {
     constructor(operator: string, value: string, repr: string) {
@@ -113,11 +125,50 @@ type EmType = {
     },
 })
 export default class FilterComponent extends Vue {
+    @Prop() deletedTag!: string;
+    @Watch('deletedTag')
+    public deleteTag(key: string, oldKey: string) {
+        let d = this.defaultTags.get(key);
+        if (isNullOrUndefined(d)) {
+            return;
+        }
+        console.log('JKZAJ', d);
+
+        this.tags.set(key, new Tag(d.operator, d.value, d.repr));
+
+        switch (key) {
+            case 'obs_regime': {
+                (this.$refs.regimeSelector as HTMLSelectElement).value = '';
+                break;
+            }
+            case 't_min': {
+                let dateMax = new Date(this.dates.max);
+                this.dates.max = dateMax;
+                break;
+            }
+            case 't_max': {
+                let dateMin = new Date(this.dates.min);
+                this.dates.min = dateMin;
+                break;
+            }
+            case 'dataproduct_type': {
+                (this.$refs.imageCheckbox as HTMLInputElement).checked = true;
+                (this.$refs.catalogCheckbox as HTMLInputElement).checked = true;
+
+                this.showImage = true;
+                this.showCatalog = true;
+                this.disableImageCheckbox = false;
+                this.disableCatalogCheckbox = false;
+                break;
+            }
+        }
+    }
+
     private showForm: boolean = false;
     @Watch('showForm')
     public changeShowForm(val: boolean, oldVal: boolean) {
         if(val) {
-            this.$nextTick(() => this.$refs.slider.refresh());
+            this.$nextTick(() => (this.$refs.slider as any).refresh());
         }
     }
 
@@ -161,19 +212,19 @@ export default class FilterComponent extends Vue {
     }
 
     private bandwidthList = [
+        'Radio',
         'Infrared',
         'Optical',
         'Gas-lines',
-        'Gamma-ray',
         'UV',
-        'Radio',
         'X',
+        'Gamma-ray',
     ];
     private defaultTags: Map<string, Tag> = new Map<string, Tag>([
         ['obs_regime', new Tag('=', '*', '')],
         ['dataproduct_type', new Tag('=', '*', '')],
-        ['t_min', new Tag('>=', '0', '')],
-        ['t_max', new Tag('<=', '100000', '')],
+        ['t_min', new Tag('<=', dateToMJD(this.dates.max).toString(), '')],
+        ['t_max', new Tag('>=', dateToMJD(this.dates.min).toString(), '')],
         ['em_min', new Tag('>=', '1E-13', '')],
         ['em_max', new Tag('<=', '1E4', '')],
     ]);
@@ -190,7 +241,7 @@ export default class FilterComponent extends Vue {
             nextTag = this.defaultTags.get(key);
         } else {
             let currentTag = this.tags.get(key);
-            nextTag = new Tag(currentTag.operator, val, val);
+            nextTag = new Tag(currentTag.operator, '*' + val + '*', val);
         }
 
         this.tags.set(key, nextTag);
@@ -202,15 +253,29 @@ export default class FilterComponent extends Vue {
     }
 
     private addDateFilterTag(val: Date, key: string) {
-        let tag = this.tags.get(key);
-        tag.value = dateToMJD(val).toString();
-        tag.repr = tag.operator + val.toDateString();
+        let tag_min = this.tags.get('t_min');
+        let tag_max = this.tags.get('t_max');
 
-        this.tags.set(key, tag);
+        console.log('DATE', val);
+
+        if (key === 't_min') {
+            tag_max.value = dateToMJD(val).toString();
+            tag_max.repr = tag_max.operator + val.toDateString();
+        } else {
+            tag_min.value = dateToMJD(val).toString();
+            tag_min.repr = tag_min.operator + val.toDateString();
+        }
+
+        this.tags.set('t_min', tag_min);
+        this.tags.set('t_max', tag_max);
 
         this.$emit('updateFilterTags', {
-            key: key,
-            tag: tag,
+            key: 't_min',
+            tag: tag_min,
+        });
+        this.$emit('updateFilterTags', {
+            key: 't_max',
+            tag: tag_max,
         });
     }
 
@@ -368,14 +433,22 @@ $pos-y-lang: 20px;
 
     border-bottom: 1px solid gainsboro;
 
-    * {
+    div.header, select, input, #unit, ul, .date-picker {
         margin: 0px 3px;
+    }
+
+    .date-picker .calendar {
+        width: 330px;
     }
 
     div.header {
         display: flex;
         
         align-items: center;
+
+        * {
+            margin: 0px 3px;
+        }
 
         i {
             font-size:22px;
