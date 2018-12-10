@@ -5,7 +5,9 @@
         <div @click="showForm = !showForm" id="icon">
             <i class="fas fa-filter"></i>
             <p>Filter</p>
-            <p class="num-datasets"><slot></slot></p>
+            <p class="num-datasets" v-if="numRemainingDatasets > 0" :style="{color: 'green'}">({{ numRemainingDatasets }}) datasets</p>
+            <p class="num-datasets" v-else :style="{color: 'red'}">({{ numRemainingDatasets }}) datasets</p>
+
         </div>
         <div v-show="showForm" id="form">
             <QuitComponent v-on:quit="showForm=false"></QuitComponent>
@@ -151,13 +153,11 @@ export default class FilterComponent extends Vue {
                 break;
             }
             case 't_min': {
-                let dateMax = new Date(this.attributes.max[0].dates);
-                this.attributes.max[0].dates = dateMax;
+                this.maxDate = this.attributes.max[0].dates;
                 break;
             }
             case 't_max': {
-                let dateMin = new Date(this.attributes.min[0].dates);
-                this.attributes.min[0].dates = dateMin;
+                this.minDate = this.attributes.min[0].dates;
                 break;
             }
             case 'dataproduct_type': {
@@ -172,6 +172,7 @@ export default class FilterComponent extends Vue {
             }
         }
     }
+    @Prop() numRemainingDatasets!: number;
 
     private showForm: boolean = false;
     @Watch('showForm')
@@ -195,12 +196,16 @@ export default class FilterComponent extends Vue {
     private minDate: Date = new Date(1970, 0, 1);
     @Watch('minDate')
     public changeMinDatePicker(date: Date, oldDate: Date) {
-        this.addDateFilterTag(date, 't_min');
+        if (date !== this.attributes.min[0].dates) {
+            this.addDateFilterTag(date, 't_min');
+        }
     }
     private maxDate: Date = new Date();
     @Watch('maxDate')
     public changeMaxDatePicker(date: Date, oldDate: Date) {
-        this.addDateFilterTag(date, 't_max');
+        if (date !== this.attributes.max[0].dates) {
+            this.addDateFilterTag(date, 't_max');
+        }
     }
     private data: Map<string, EmType> = new Map<string, EmType>([
         ['eV', {

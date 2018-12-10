@@ -166,7 +166,7 @@ export default class CollectionComponent extends Vue {
 }
 #collection-component div.header {
     padding: 5px;
-    background-color: whitesmoke;
+    background-color: #eeeeee;
 }
 #collection-component h4 {
     text-align: center;

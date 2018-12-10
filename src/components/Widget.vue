@@ -4,8 +4,10 @@
 <div id="widget-component" v-bind:style="{ top: offsetTop.toString() + 'px' }">
     <QuitComponent v-on:quit="$emit('quit')"></QuitComponent>
     <h3 id="title">Collection Selection Tool</h3>
-    <FilterComponent v-bind:deletedTag="deletedTag" v-on:updateFilterTags="updateTags($event.key, $event.tag)">
-        ({{ root.numberOfCatalogs }}) datasets
+    <FilterComponent 
+        :deletedTag="deletedTag"
+        :numRemainingDatasets="root.numberOfCatalogs"
+        @updateFilterTags="updateTags($event.key, $event.tag)">
     </FilterComponent>
 
     <div v-show="tagsList.length > 0" id="filter-tags">
@@ -52,7 +54,10 @@
     </div>
 
     <div id="footer">
-        <SearchComponent v-on:updateFilterTags="updateTags($event.key, $event.tag)"></SearchComponent>
+        <SearchComponent
+            :deletedTag="deletedTag"
+            @updateFilterTags="updateTags($event.key, $event.tag)">
+        </SearchComponent>
     </div>
 </div>
 </template>

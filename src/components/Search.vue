@@ -4,9 +4,8 @@
     <div id="search-component">
         <p>Keywords: </p>
         <div class="wrap">
-            <input
-                v-on:input="addKeywordsTag($event.target.value)"
-                v-bind:value="search" placeholder="Search..." />
+            <input @input="addKeywordsTag($event.target.value)"
+                v-model="search" placeholder="Search..." />
         </div>
         <TooltipComponent v-bind:type="0" v-bind:width="'150px'" v-bind:height="'70px'"> 
             <p>Search for specific collections by typing keywords (e.g. SDSS or AllWISE)</p>
@@ -26,7 +25,16 @@ import { Tag } from './Filter.vue';
     },
 })
 export default class SearchComponent extends Vue {
-    private search: string = '';
+    private search: string = "";
+
+    @Prop() deletedTag!: string;
+    @Watch('deletedTag')
+    public deleteTag(key: string, oldKey: string) {
+        console.log('delete search tag', key);
+        if (key === "keywords") {
+            this.search = "";
+        }
+    }
 
     public mounted() {
         console.log('Search component MOUNTED');
