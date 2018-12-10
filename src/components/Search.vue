@@ -50,12 +50,13 @@ export default class SearchComponent extends Vue {
 
         input {
             width: 100%;
-            background-color: whitesmoke;
-            border: 1px solid gainsboro;
             color: gray;
 
-            padding: 0;
-            padding: 2px 0px;
+            border-radius: 2px;
+            width: 90%;
+            border: 1px solid gray;
+
+            padding: 5px;
 
             font-family: Helvetica, Arial, sans-serif;
         }

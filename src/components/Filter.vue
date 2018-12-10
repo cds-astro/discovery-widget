@@ -3,10 +3,12 @@
 <template>
     <div id="filter">
         <div @click="showForm = !showForm" id="icon">
+            <i class="fas fa-filter"></i>
             <p>Filter</p>
         </div>
         <div v-show="showForm" id="form">
             <QuitComponent v-on:quit="showForm=false"></QuitComponent>
+
             <div class="metadata">
                 <div class="header">
                     <i class="fa fa-wifi fa-1x"></i>
@@ -24,20 +26,21 @@
                     <i class="fa fa-calendar"></i>
                     <p>Date</p>
                 </div>
-                <datepicker ref="tminDatePicker" class="date-picker" calendar-class="calendar"
-                    @selected="addDateFilterTag($event, 't_min')"
-                    :minimumView="'month'" :maximumView="'year'" :initialView="'year'"
-                    :value="dates.min"
-                    :format="'MM dd yyyy'"
-                    :typeable="true"
-                    :placeholder="'MM-DD-YYYY'"></datepicker>
-                <datepicker ref="tmaxDatePicker" class="date-picker" calendar-class="calendar"
-                    @selected="addDateFilterTag($event, 't_max')"
-                    :minimumView="'month'" :maximumView="'year'" :initialView="'year'"
-                    :value="dates.max"
-                    :format="'MM dd yyyy'"
-                    :typeable="true"
-                    :placeholder="'MM-DD-YYYY'"></datepicker>
+                
+                <v-date-picker
+                    :available-dates='{ start: attributes.min[0].dates, end: maxDate }'
+                    :input-props='{ class: "input-date", placeholder: "Lower-bound date" }'
+                    mode='single'
+                    v-model="minDate"
+                    :attributes="attributes.min"
+                    show-caps></v-date-picker>
+                <v-date-picker
+                    :available-dates='{ start: minDate, end: new Date() }'
+                    :input-props='{ class: "input-date", placeholder: "Upper-bound date" }'
+                    v-model="maxDate"
+                    mode='single'
+                    :attributes="attributes.max"
+                    show-caps></v-date-picker>
             </div>
 
             <div class="metadata">
@@ -72,7 +75,7 @@
                     </li>
                 </ul>
             </div>
-            
+
             <div class="metadata">
                 <div class="header">
                    <i class="fas fa-wrench"></i>
@@ -93,10 +96,16 @@
 import { Vue, Prop, Component, Watch } from 'vue-property-decorator';
 import QuitComponent from './QuitIcon.vue';
 import TooltipComponent from './Tooltip.vue';
-import Datepicker from 'vuejs-datepicker';
 import vueSlider from 'vue-slider-component';
 import { dateToMJD } from './../utils';
 import { isNullOrUndefined, isNull } from 'util';
+import VCalendar from 'v-calendar';
+import 'v-calendar/lib/v-calendar.min.css';
+
+// Use v-calendar, v-date-picker & v-popover components
+Vue.use(VCalendar, {
+  firstDayOfWeek: 2,  // Monday
+});
 
 export class Tag {
     constructor(operator: string, value: string, repr: string) {
@@ -119,9 +128,9 @@ type EmType = {
     name: 'filter',
     components: {
         QuitComponent,
-        Datepicker,
         vueSlider,
         TooltipComponent,
+        VCalendar,
     },
 })
 export default class FilterComponent extends Vue {
@@ -132,7 +141,6 @@ export default class FilterComponent extends Vue {
         if (isNullOrUndefined(d)) {
             return;
         }
-        console.log('JKZAJ', d);
 
         this.tags.set(key, new Tag(d.operator, d.value, d.repr));
 
@@ -142,13 +150,13 @@ export default class FilterComponent extends Vue {
                 break;
             }
             case 't_min': {
-                let dateMax = new Date(this.dates.max);
-                this.dates.max = dateMax;
+                let dateMax = new Date(this.attributes.max[0].dates);
+                this.attributes.max[0].dates = dateMax;
                 break;
             }
             case 't_max': {
-                let dateMin = new Date(this.dates.min);
-                this.dates.min = dateMin;
+                let dateMin = new Date(this.attributes.min[0].dates);
+                this.attributes.min[0].dates = dateMin;
                 break;
             }
             case 'dataproduct_type': {
@@ -172,11 +180,27 @@ export default class FilterComponent extends Vue {
         }
     }
 
-    private dates = {
-        min: new Date(1970, 1,  1),
-        max: new Date(),
+    private attributes = {
+        min: [{
+            key: 'today',
+            dates: new Date(1970, 0, 1),
+        }],
+        max: [{
+            key: 'today',
+            dates: new Date(),
+        }],
     }
 
+    private minDate: Date = new Date(1970, 0, 1);
+    @Watch('minDate')
+    public changeMinDatePicker(date: Date, oldDate: Date) {
+        this.addDateFilterTag(date, 't_min');
+    }
+    private maxDate: Date = new Date();
+    @Watch('maxDate')
+    public changeMaxDatePicker(date: Date, oldDate: Date) {
+        this.addDateFilterTag(date, 't_max');
+    }
     private data: Map<string, EmType> = new Map<string, EmType>([
         ['eV', {
             value: ["10e+0", "10e+2"],
@@ -223,8 +247,8 @@ export default class FilterComponent extends Vue {
     private defaultTags: Map<string, Tag> = new Map<string, Tag>([
         ['obs_regime', new Tag('=', '*', '')],
         ['dataproduct_type', new Tag('=', '*', '')],
-        ['t_min', new Tag('<=', dateToMJD(this.dates.max).toString(), '')],
-        ['t_max', new Tag('>=', dateToMJD(this.dates.min).toString(), '')],
+        ['t_min', new Tag('<=', dateToMJD(this.attributes.max[0].dates).toString(), '')],
+        ['t_max', new Tag('>=', dateToMJD(this.attributes.min[0].dates).toString(), '')],
         ['em_min', new Tag('>=', '1E-13', '')],
         ['em_max', new Tag('<=', '1E4', '')],
     ]);
@@ -389,6 +413,14 @@ $pos-y-lang: 20px;
     padding: 10px;
     border-top: 1px solid gainsboro;
     border-bottom: 1px solid gainsboro;
+
+    * {
+        display: inline;
+    }
+
+    p {
+        margin: 0px 5px;
+    }
 }
 
 #filter #icon:hover {
@@ -433,12 +465,16 @@ $pos-y-lang: 20px;
 
     border-bottom: 1px solid gainsboro;
 
-    div.header, select, input, #unit, ul, .date-picker {
+    div.header, select, input, #unit, ul {
         margin: 0px 3px;
     }
 
-    .date-picker .calendar {
-        width: 330px;
+    .input-date {
+        color: gray;
+        padding: 5px;
+        border-radius: 2px;
+        width: 90%;
+        border: 1px solid gray;
     }
 
     div.header {
