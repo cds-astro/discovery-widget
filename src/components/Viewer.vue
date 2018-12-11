@@ -1,7 +1,5 @@
 <template>
-    <div id="viewer">
-        <div id="aladin-lite"></div>
-    </div>
+    <div id="aladin-lite"></div>
 </template>
 
 <script lang="ts">
