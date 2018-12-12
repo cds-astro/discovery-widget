@@ -5,9 +5,9 @@
     <QuitComponent v-on:quit="$emit('quit')"></QuitComponent>
     <h3 id="title">Collection Selection Tool</h3>
     <FilterComponent 
-        :deletedTag="deletedTag"
+        :updatedTagsFromWidget="sendTagsToFilter"
         :numRemainingDatasets="root.numberOfCatalogs"
-        @updateFilterTags="updateTags($event.key, $event.tag)">
+        @updateFilterTags="updateTags($event.key, $event.tags)">
     </FilterComponent>
 
     <div v-show="tagsList.length > 0" id="filter-tags">
@@ -55,8 +55,8 @@
 
     <div id="footer">
         <SearchComponent
-            :deletedTag="deletedTag"
-            @updateFilterTags="updateTags($event.key, $event.tag)">
+            :updatedTagsFromWidget="sendTagsToFilter"
+            @updateFilterTags="updateTags($event.key, $event.tags)">
         </SearchComponent>
     </div>
 </div>
@@ -472,9 +472,9 @@ export default class WidgetComponent extends Vue {
     private scrollY: number = 0;
 
     /* Filter tags */
-    private tags: Map<string, Tag> = new Map<string, Tag>();
+    private tags: Map<string, Array<Tag>> = new Map<string, Array<Tag>>();
     private tagsList: Array<Tag> = [];
-    private deletedTag: string = '';
+    private sendTagsToFilter: Map<string, Array<Tag>> = this.tags;
 
     public mounted() {
         console.log('Tree component MOUNTED'); 
@@ -626,36 +626,53 @@ export default class WidgetComponent extends Vue {
         );
     }
 
-    private updateTags(key: string, tag: Tag) {
-        /* Remove tags having a value == '' */
-        if (tag.repr.length == 0) {
+    private updateTags(key: string, tags: Array<Tag>) {
+        if (tags.length == 0) {
             this.tags.delete(key);
         } else {
-            this.tags.set(key, tag);
+            this.tags.set(key, tags);
         }
-        this.tagsList = Array.from(this.tags.values());
 
-        console.log('updated tags', this.tags);
-
+        // Update the list of tags to show
+        this.tagsList = [];
+        Array.from(this.tags.values()).forEach(t => {
+            this.tagsList = this.tagsList.concat(t);
+        });
+        console.log('updated tags', this.tags, this.tagsList);
         this.queryMOCServerOnFilter();
     }
 
     private removeTag(tagToRemove: Tag) {
-        let nextTagSet = new Map<string, Tag>(this.tags);
-
-        for (let [key, tag] of this.tags.entries()) {
-            if (tag === tagToRemove) {
-                nextTagSet.delete(key);
-                this.deletedTag = key;
-                this.$nextTick(() => (this.deletedTag = ''));
+        //let nextTagSet = new Map<string, Array<Tag>>(this.tags);
+        let tagArrayCandidate = [];
+        let keyCandidate
+        let id = -1;
+        for (let [key, tags] of this.tags.entries()) {
+            id = tags.indexOf(tagToRemove);
+            if (id > -1) {
+                tagArrayCandidate = tags;
+                keyCandidate = key;
+                //this.deletedTag = ;
+                /*this.$nextTick(() => (this.deletedTag = ''));*/
                 break;
             }
         }
-
-        // erase old tag set with the new one
-        this.tags = nextTagSet;
-        this.tagsList = Array.from(this.tags.values());
         
+        tagArrayCandidate.splice(id, 1);
+        if (tagArrayCandidate.length == 0) {
+            this.tags.delete(keyCandidate);
+        } else {
+            this.tags.set(keyCandidate, tagArrayCandidate);
+        }
+        // Update the list of tags to show
+        this.tagsList = [];
+        Array.from(this.tags.values()).forEach(t => {
+            this.tagsList = this.tagsList.concat(t);
+        });
+        console.log('updated tags', this.tags, this.tagsList);
+        
+        this.sendTagsToFilter = new Map<string, Array<Tag>>(this.tags);
+
         this.queryMOCServerOnFilter();
     }
 }
@@ -753,9 +770,11 @@ export default class WidgetComponent extends Vue {
 
             margin: 2px;
             
-            background-color: whitesmoke;
-            border: 1px solid gainsboro;
+            background-color: #3498db;
             color: black;
+            border-radius: 3px;
+
+            color: #ffff;
 
             p {
                 font-size: 11px;
@@ -764,7 +783,6 @@ export default class WidgetComponent extends Vue {
 
             a.delete-tag {
                 display: inline-block;
-                border: 1px solid gainsboro;
                 
                 margin: 1px;
             }

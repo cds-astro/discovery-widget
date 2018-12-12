@@ -17,6 +17,7 @@
 import { Vue, Prop, Component, Watch } from 'vue-property-decorator';
 import TooltipComponent from './Tooltip.vue';
 import { Tag } from './Filter.vue';
+import { isNullOrUndefined, isNull } from 'util';
 
 @Component({
     name: 'search-component',
@@ -26,12 +27,21 @@ import { Tag } from './Filter.vue';
 })
 export default class SearchComponent extends Vue {
     private search: string = "";
-
+    /*
     @Prop() deletedTag!: string;
     @Watch('deletedTag')
     public deleteTag(key: string, oldKey: string) {
         console.log('delete search tag', key);
         if (key === "keywords") {
+            this.search = "";
+        }
+    }*/
+
+    @Prop() updatedTagsFromWidget!: Map<string, Array<Tag>>;
+    @Watch('updatedTagsFromWidget')
+    public changeTagsFromWidget(newTags: Map<string, Array<Tag>>, oldTags: Map<string, Array<Tag>>) {
+        const tags = newTags.get("keywords");
+        if(isNullOrUndefined(tags)) {
             this.search = "";
         }
     }
@@ -45,7 +55,7 @@ export default class SearchComponent extends Vue {
         
         this.$emit('updateFilterTags', {
             key: 'keywords',
-            tag: tag,
+            tags: [tag],
         });
     }
 }
