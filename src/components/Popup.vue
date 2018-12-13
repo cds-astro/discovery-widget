@@ -1,52 +1,70 @@
 <!-- src/components/Popup.vue -->
 
 <template>
-    <div id="popup-component">
-        <div id="header">
-            <div id="figure">
-                <img v-if="record.isVizierCatalog()" v-bind:src="record.previewURL" alt="preview">
-                <img v-else v-bind:style="{ height: '100px' }" v-bind:src="record.previewURL" alt="preview">
+    <div id="popup-component" :style="{top: positionY.toString() + 'px'}">
+        <div id="tail" :style="{transform: 'translate(-50%, -50%) translateY(' + (offsetY/2 + 10).toString() + 'px)'}"></div>
+        <div id="top">
+            <div id="header">
+                <div id="figure">
+                    <img v-if="record.isVizierCatalog()" v-bind:src="record.previewURL" alt="preview">
+                    <img v-else v-bind:style="{ height: '125px' }" v-bind:src="record.previewURL" alt="preview">
 
-                <figcaption><p>{{ record.id }}</p></figcaption>
-            </div>
-            <ul v-if="record.obs_regime && record.obs_regime.length > 0">
-                <p>Band:</p>
-                <li class="regime" v-for="regime in record.obs_regime">
-                    {{ regime }}
-                </li>
-            </ul>
-        </div>
-
-        <div id="content">
-            <div id="title">
-                <h4>{{ record.obs_title }}</h4>
-                <QuitComponent v-on:quit="$emit('quit')"></QuitComponent>
+                    <figcaption><p>{{ record.id }}</p></figcaption>
+                </div>
+                <ul v-if="record.obs_regime && record.obs_regime.length > 0">
+                    <p>Band:</p>
+                    <li class="regime" v-for="regime in record.obs_regime">
+                        {{ regime }}
+                    </li>
+                </ul>
             </div>
 
-            <div v-if="record.description" id="description"><p>{{ record.description }}</p></div>
-            <div v-else id="description"><p>No description</p></div>
-        </div>
+            <div id="content">
+                <div id="title">
+                    <h4>{{ record.obs_title }}</h4>
+                    <QuitComponent v-on:quit="$emit('quit')"></QuitComponent>
+                </div>
 
-        <!-- Check the type of the collection (i.e. image or catalog) -->
-        <div id="bottombar" v-if="record.isImageType()">
-            <div id="left">
-                <button v-on:click="addCollection()"><p>Image</p></button>
-                <button v-if="record.data.moc_access_url" v-on:click="$root.$emit('addCoverage', record.data)"><p>Coverage</p></button>
-            </div>
-            <div id="right">
-                <a v-bind:href="record.propertiesFileUrl()" target='_blank'><button><p>Properties</p></button></a>
+                <div v-if="record.description" id="description"><p>{{ record.description }}</p></div>
+                <div v-else id="description"><p>No description</p></div>
             </div>
         </div>
-        <div id="bottombar" v-else>
-            <div id="left">
-                <button v-on:click="addCollection()"><p>Catalog</p></button>
-                <button v-if="record.data.moc_access_url" v-on:click="$root.$emit('addCoverage', record.data)"><p>Coverage</p></button>
-            </div>
-            <div id="right">
-                <a v-if="record.isVizierCatalog()" v-bind:href="record.obs_description_url" target='_blank'><button><p>Vizier</p></button></a>
-                <a v-bind:href="record.propertiesFileUrl()" target='_blank'><button><p>Properties</p></button></a>
-            </div>
+        
+        <div class="footer" v-if="record.isImageType()">
+ 
+            <button class="addImageHiPS" v-on:click="addCollection()">
+                <i class="fas fa-layer-group"></i>
+            </button>
+
+            <button class="addMOC" v-if="record.data.moc_access_url" v-on:click="$root.$emit('addCoverage', record.data)">
+                <i class="fas fa-map-marked-alt"></i>
+            </button>
+
+            <form :action="record.propertiesFileUrl()" method="post" target="_blank">
+                <button><i class="fas fa-file"></i></button>
+            </form>
+
         </div>
+        <div class="footer" v-else>
+
+            <button class="addCatalog" v-on:click="addCollection()">
+                <i class="fas fa-layer-group"></i>
+            </button>
+
+            <button class="addMOC" v-if="record.data.moc_access_url" v-on:click="$root.$emit('addCoverage', record.data)">
+                <i class="fas fa-map-marked-alt"></i>
+            </button>
+
+            <form v-if="record.isVizierCatalog()" :action="record.obs_description_url" method="post" target="_blank">
+                <button><i class="fas fa-info"></i></button>
+            </form>
+
+            <form :action="record.propertiesFileUrl()" method="post" target="_blank">
+                <button><i class="fas fa-file"></i></button>
+            </form>
+
+        </div>
+        
     </div>
 </template>
 
@@ -136,6 +154,8 @@ class Record {
 export default class PopupComponent extends Vue {
     @Prop() public collection!: HeaderSelectionEvent;
     @Prop() public viewport!: Viewport;
+    @Prop() public positionY!: number;
+    @Prop() public offsetY!: number;
 
     private record: Record = new Record();
 
@@ -170,122 +190,172 @@ export default class PopupComponent extends Vue {
 }
 </script>
 
-<style>
+<style lang="scss">
+
+$space: 5px;
+$width-img: 125px;
+$size-tail: 10px;
 
 #popup-component {
     left:100%;
+    transform: translate($size-tail, -$size-tail);
     position: absolute;
-    overflow: hidden;
+
 
     background-color: white;
     color: black;
     list-style-type: none;
-    text-align: center;
+    width: 150%;
+
+    border-radius: 4px;
     border: 1px solid gray;
-    border-radius: 2px;
-    width: 402px;
-    padding: 5px;
-}
 
-img {
-  font-family: 'Helvetica';
-  display: block;
-  position: relative;
+    padding: $space;
 
-  width: 100px;
-  height:auto;
-}
+    #top {
+        display: flex;
+        align-items: flex-start;
+        
+        margin-bottom: $space;
 
-img:before {
-  background-image: url("./../../images/thumbnail.jpeg");
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: 100px 100px;
+        #header {
+            flex-grow: 0;
 
-  width: 100%;
-  height: 100%;
-  
-  content: " ";
-  
-  display: block;
-  position: absolute;
-  z-index: 2;
-  top: 0;
-  left: 0;
-  background-color: white;
-}
+            margin-right: $space;
 
-img:after {
-  content: "\f127" " not available";
-  font-size: 12px;
-  font-family: FontAwesome;
-  color: black;
-  display: block;
-  position: absolute;
-  z-index: 2;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-}
+            #figure {
+                width: $width-img;
+                border: 1px solid black;
 
-#header, #content {
-    float: left;
-    padding: 0;
-}
+                img {
+                    display: block;
+                    position: relative;
 
-#header ul {
-    margin: 0;
-    padding: 0;
-}
+                    width: 100%;
+                    height: auto;
+                }
 
-#figure {
-    width: 100px;
-    border: 1px solid black;
-}
+                img:before {
+                    background-image: url("./../../images/thumbnail.jpeg");
+                    background-repeat: no-repeat;
+                    background-position: center;
+                    background-size: $width-img $width-img;
 
-figcaption p {
-    font-size: x-small;
-    word-wrap: break-word;
-}
+                    width: 100%;
+                    height: 100%;
+                    
+                    content: " ";
+                    
+                    display: block;
+                    position: absolute;
+                    z-index: 2;
+                    top: 0;
+                    left: 0;
+                    background-color: white;
+                }
 
-#bottombar {
-}
+                img:after {
+                    content: "\f127" " not available";
+                    font-size: 12px;
+                    font-family: FontAwesome;
+                    color: black;
+                    display: block;
+                    position: absolute;
+                    z-index: 2;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                }
+                
+                figcaption p {
+                    font-size: x-small;
+                    word-wrap: break-word;
+                    font-family: Helvetica, Arial, sans-serif;
+                    text-align: center;
+                }
+            }
 
-#content {
-    width: 300px;
-}
+            ul {
+                width: 100%;
+                text-align: center;
+                
+                li.regime {
+                    font-size: small;
+                    word-wrap: break-word;
+                }
+            }
+        }
 
-#description {
-    overflow-y: scroll;
-    text-align:justify;
-    max-height: 150px;
-    padding: 0px 5px;
-    font-size:inherit;
-}
+        #content {
+            #title {
+                margin: 0px 10px;
+                padding: 10px 5px;
+                border-bottom: 3px solid gray;
+            }
 
-#left, #right {
-    bottom: 100%;
-    margin-top: 10px;
-}
+            #description {
+                margin-top: 5px;
+                overflow-y: scroll;
+                text-align:justify;
+                max-height: 150px;
+            }
+        }
+    }
 
-#left {
-    float: left;
-}
+    .footer {
 
-#right {
-    float: right;   
-}
+        form {
+            display: inline-block;
+            margin: 0;
+        }
 
-#header ul {
-    width: 100px;
-}
+        button {
+            margin: 0;
+            position: relative;
 
-#header ul li.regime {
-    font-size: small;
-    word-wrap: break-word;
-}
+            border: none;
+            color: white;
+            
+            background: #3498db;
+            
+            border-radius: 4px;
+            width: 36px;
+            height: 36px;
+            font-size: 22px;
+            
+            display: inline-block;
+            
+            vertical-align: middle;
 
-#content #title {
-    width: 280px;
+            margin-right: 5px;
+
+            &:hover {
+                background-color: #386786;
+            }
+
+            i {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+            }
+        }
+
+
+    }
+
+    #tail {
+        content: " ";
+
+        position: absolute;
+        left: 0%;
+        top: 0%;
+
+        margin-left: -$size-tail;
+
+        border-width: $size-tail;
+        border-style: solid;
+        border-color: transparent white transparent transparent;
+    }
 }
 </style>

@@ -7,7 +7,7 @@
             <input @input="addKeywordsTag($event.target.value)"
                 v-model="search" placeholder="Search..." />
         </div>
-        <TooltipComponent v-bind:type="0" v-bind:width="'150px'" v-bind:height="'70px'"> 
+        <TooltipComponent v-bind:type="0" v-bind:width="'150px'" v-bind:height="'100px'"> 
             <p>Search for specific collections by typing keywords (e.g. SDSS or AllWISE)</p>
         </TooltipComponent>
     </div>
@@ -50,13 +50,19 @@ export default class SearchComponent extends Vue {
         console.log('Search component MOUNTED');
     }
 
-    public addKeywordsTag(val: string) {
-        let tag = new Tag('=', val, val);
-        
-        this.$emit('updateFilterTags', {
-            key: 'keywords',
-            tags: [tag],
-        });
+    public addKeywordsTag(input: string) {
+        if (input) {
+            let tag = new Tag('=', input, input);
+            this.$emit('updateFilterTags', {
+                key: 'keywords',
+                tags: [tag],
+            });
+        } else {
+            this.$emit('updateFilterTags', {
+                key: 'keywords',
+                tags: [],
+            });
+        }
     }
 }
 </script>
@@ -69,15 +75,14 @@ export default class SearchComponent extends Vue {
     margin: 0px 10px;
 
     .wrap {
-        margin: 0px 5px;
+        margin: 0px 10px;
 
         input {
             width: 100%;
             color: gray;
 
             border-radius: 2px;
-            width: 90%;
-            border: 1px solid gray;
+            border: 1px solid gainsboro;
 
             padding: 5px;
 

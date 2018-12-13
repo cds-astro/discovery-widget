@@ -7,7 +7,6 @@
             <p>Filter</p>
             <p class="num-datasets" v-if="numRemainingDatasets > 0" :style="{color: 'green'}">({{ numRemainingDatasets }}) datasets</p>
             <p class="num-datasets" v-else :style="{color: 'red'}">({{ numRemainingDatasets }}) datasets</p>
-
         </div>
         <div v-show="showForm" id="form">
             <QuitComponent v-on:quit="showForm=false"></QuitComponent>
@@ -15,10 +14,9 @@
             <div class="part">
                 <h3>Global</h3>
                 <div class="metadata">
-                    <div class="header">
-                        <i class="fas fa-wifi"></i>
-                        <p>Bandwidth</p>
-                    </div>
+                    <i class="fas fa-wifi"></i>
+                    <label>Bandwidth :</label>
+
                     <multiselect class="multisct" v-model="regime"
                         :options="bandwidthList"
                         :multiple="true"
@@ -30,11 +28,9 @@
                 </div>
 
                 <div class="metadata">
-                    <div class="header">
-                        <i class="fas fa-calendar"></i>
-                        <p>Date</p>
-                    </div>
-                    
+                    <i class="fas fa-calendar"></i>
+                    <label>Date :</label>
+
                     <v-date-picker
                         :available-dates='{ start: attributes.min[0].dates, end: maxDate }'
                         :input-props='{ class: "input-date", placeholder: "Lower-bound date" }'
@@ -53,11 +49,10 @@
                 </div>
 
                 <div class="metadata">
-                    <div class="header">
                     <i class="fas fa-broadcast-tower"></i>
-                        <p>Em</p>
-                    </div>
-                    <vue-slider ref="slider" v-model="em_value" v-bind="options" v-bind:width="'100%'"></vue-slider>
+                    <label>Em :</label>
+
+                    <vue-slider ref="slider" v-model="em_value" @drag-end="changeEmValues($event.value)" v-bind="options" v-bind:width="'100%'"></vue-slider>
                     <select id="unit" v-on:change="changeEmUnit($event.target.value);">
                         <option>eV</option>
                         <option>Hz</option>
@@ -69,31 +64,28 @@
                 </div>
 
                 <div class="metadata">
-                    <div class="header">
                     <i class="fas fa-image"></i>
-                    <p>Type</p>
-                    </div>
+                    <label>Type :</label>
+
                     <ul class="checkbox-container">
                         <li>
-                            <input ref="imageCheckbox" id="image-checkbox" type="checkbox" v-bind:disabled="disableImageCheckbox" checked="checked" @click="addDataTypeFilterTag('image', $event.target.checked)">
-                            <label for="image-checkbox">Image</label>
+                            <input ref="imageCheckbox" id="image-checkbox" type="checkbox" v-bind:disabled="disableImageCheckbox" checked="checked" @click="addDataTypeFilterTag('image', $event.target.checked)"><label>Image</label>
                         </li>
                         <li>
-                            <input ref="catalogCheckbox" id="catalog-checkbox" type="checkbox" v-bind:disabled="disableCatalogCheckbox" checked="checked" @click="addDataTypeFilterTag('catalog', $event.target.checked)">
-                            <label for="catalog-checkbox">Catalog</label>
+                            <input ref="catalogCheckbox" id="catalog-checkbox" type="checkbox" v-bind:disabled="disableCatalogCheckbox" checked="checked" @click="addDataTypeFilterTag('catalog', $event.target.checked)"><label>Catalog</label>
                         </li>
                     </ul>
                 </div>
+ 
             </div>
 
             
             <div class="part">
                 <h3>Catalogs only</h3>
-                <div class="metadata">
-                    <div class="header">
-                        <i class="fas fa-space-shuttle"></i>
-                        <p>Mission</p>
-                    </div>
+                <div class="metadata">                    
+                    <i class="fas fa-space-shuttle"></i>
+                    <label>Mission :</label>
+
                     <multiselect class="multisct" v-model="mission"
                         :options="missionList"
                         :multiple="true"
@@ -105,10 +97,9 @@
                 </div>
 
                 <div class="metadata">
-                    <div class="header">
-                        <i class="fas fa-satellite"></i>
-                        <p>Astronomy</p>
-                    </div>
+                    <i class="fas fa-satellite"></i>
+                    <label>Astronomy :</label>
+
                     <multiselect v-model="astronomy"
                         :options="astronomyList"
                         :multiple="true"
@@ -166,14 +157,7 @@ export default class FilterComponent extends Vue {
     public mounted() {
         console.log('Filter component MOUNTED');
     }
-    /*private defaultTags: Map<string, Array<Tag>> = new Map<string, Array<Tag>>([
-        ['obs_regime', [new Tag('=', '*', '')]],
-        ['dataproduct_type', [new Tag('=', '*', '')]],
-        ['t_min', [new Tag('<=', dateToMJD(this.attributes.max[0].dates).toString(), '')]],
-        ['t_max', [new Tag('>=', dateToMJD(this.attributes.min[0].dates).toString(), '')]],
-        ['em_min', [new Tag('>=', '1E-13', '')]],
-        ['em_max', [new Tag('<=', '1E4', '')]],
-    ]);*/
+
     private tags: Map<string, Array<Tag>> = new Map<string, Array<Tag>>();
 
     @Prop() updatedTagsFromWidget!: Map<string, Array<Tag>>;
@@ -416,8 +400,7 @@ export default class FilterComponent extends Vue {
     ]);
     private unit: string = 'eV';
     private em_value: Array<string> = ["1e-9", "1e+9"];
-    @Watch('em_value')
-    public pickNewEmValues(em_value: string[], old: string[]) {
+    private changeEmValues(em_value: string[]) {
         this.em_value = em_value;
         console.log('CHANGE EM');
         this.addEmFilterTag(em_value);
@@ -473,7 +456,7 @@ export default class FilterComponent extends Vue {
         }
 
         this.unit = unit;
-        this.em_value = [a.toString(), b.toString()];
+        this.changeEmValues([a.toString(), b.toString()]);
 
         this.options.data = this.ticks.get(unit);
         this.options.value = this.em_value;
@@ -711,6 +694,7 @@ $pos-y-lang: 20px;
     background-color: white;
     border: 1px solid gray;
     width: 450px;
+    padding: 10px;
 }
 
 #filter #form:after {
@@ -729,22 +713,27 @@ $pos-y-lang: 20px;
 }
 
 #filter #form .part {
-    border-bottom: 2px solid gainsboro;
-    margin: 0px 5px;
-
-    padding: 5px;
 
     h3 {
-        padding-bottom: 5px;
+        padding: 5px 0px;
+        border-bottom: 2px solid gainsboro;
+    }
+
+    .metadata > * {
+        margin-right: 5px;
     }
 
     .metadata {
         padding: 25px 10px;
         display: flex;
-        //justify-content: space-around;
+
         align-items: center;
 
         border-top: 1px solid gainsboro;
+
+        label {
+            white-space:nowrap;
+        }
 
         .multisct {
             z-index: 6;
@@ -756,54 +745,52 @@ $pos-y-lang: 20px;
 
         .multiselect__select {
             background-color: gainsboro;
+                        padding: 5px;
         }
 
-        p {
-            margin: 0px 5px;
-        }
         .input-date {
             color: gray;
 
-            padding: 5px 0px;
+            padding: 10px;
 
             border-radius: 5px;
             border: 1px solid #e8e8e8;
             background: #fff;
             font-size: 14px;
-        }
 
-        div.header {
-            display: flex;
-            
-            align-items: center;
-
-            * {
-                margin: 0px 3px;
-            }
-
-            i {
-                font-size:22px;
-            }
-        }
-
-        select {
             width: 100%;
-        }
-
-        input {
-            width: 100%;
-        }
-
-        #unit {
-            width: 20%;
         }
 
         ul.checkbox-container {
+            padding: 0;
+            width: 100%;
+            
             li {
+                list-style-type: none;
                 display: inline-block;
+                margin-right: 10px; 
 
-                * {
+                /*** custom checkboxes ***/
+                input[type=checkbox] {
+                    position: relative;
+                    width: auto;
+                }
+                /* to hide the checkbox itself */
+                input[type=checkbox]:before {
+                    position: absolute;
+                    background-color: #FFFFFF;
+                    height: 100%;
+                    width: 100%;
+                    font-family: FontAwesome;
+                    font-size: 15px;
                     display: inline-block;
+                    content:"\f096";
+                }
+                /* space between checkbox and label */
+                input[type=checkbox]:checked:before {
+                    font-family: FontAwesome;
+                    display: inline-block;
+                    content:"\f046";
                 }
             }
         }

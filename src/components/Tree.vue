@@ -5,11 +5,10 @@
         <PopupComponent ref="popupComponent"
             v-show="showPopup && !popupOutOfBounds"
             v-on:quit="hidePopup()"
-            v-bind:collection="collectionToShow"
-            v-bind:viewport="viewport"
-            v-bind:style="{
-                top: positionPopup.toString() + 'px',
-            }">
+            :collection="collectionToShow"
+            :viewport="viewport"
+            :positionY="positionPopup"
+            :offsetY="collectionToShowHeight">
         </PopupComponent>
 
         <div id="noleaf" v-if="root && !root.isLeaf()">
@@ -102,6 +101,8 @@ export default class TreeComponent extends Vue {
     private positionPopup: number = 0;
     private popupOutOfBounds: boolean = false;
 
+    private collectionToShowHeight: number = 0;
+
     @Watch('tree')
     public changeTree(newTree: Tree, oldRoot: Tree) {
         // Find the node where the user is so that the tree does not cd to its root
@@ -190,6 +191,8 @@ export default class TreeComponent extends Vue {
         }
 
         this.collectionToShow = this.hoveredCollection;
+        this.collectionToShowHeight = this.collectionToShow.element.offsetHeight;
+        
         let scrollableElement = this.$el.parentElement;
         let widgetElement = scrollableElement.parentElement;
         this.positionPopup = this.collectionToShow.offsetTop - widgetElement.offsetTop;
@@ -207,6 +210,8 @@ export default class TreeComponent extends Vue {
         // located under the mouse pointer.
         if (!this.selectPopup) {
             this.collectionToShow = this.hoveredCollection;
+            this.collectionToShowHeight = this.collectionToShow.element.offsetHeight;
+            
             this.showPopup = true;
 
             let scrollableElement = this.$el.parentElement;
