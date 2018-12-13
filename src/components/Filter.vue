@@ -58,8 +58,15 @@
                         <option>Hz</option>
                         <option>m</option>
                     </select>
+                    
                     <TooltipComponent v-bind:type="0" v-bind:width="'504px'" v-bind:height="'385px'">
-                        <img src="./../../images/A4C10.png"></img>
+                        <template slot="hover-element">
+                            <i class="fa fa-question-circle question-icon" style="font-size:24px"></i>
+                        </template>
+
+                        <template slot="content">
+                            <img src="./../../images/A4C10.png" />
+                        </template>
                     </TooltipComponent>
                 </div>
 
@@ -731,6 +738,10 @@ $pos-y-lang: 20px;
 
         border-top: 1px solid gainsboro;
 
+        i {
+            font-size: 22px;
+        }
+
         label {
             white-space:nowrap;
         }
@@ -745,11 +756,11 @@ $pos-y-lang: 20px;
 
         .multiselect__select {
             background-color: gainsboro;
-                        padding: 5px;
+            padding: 5px;
         }
 
         .input-date {
-            color: gray;
+            color: black;
 
             padding: 10px;
 

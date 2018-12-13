@@ -2,9 +2,9 @@
 
 <template>
     <div id="tooltip">
-        <div v-if="type == 0" class="fa fa-question-circle question-icon" style="font-size:24px"></div>
+        <slot name="hover-element"></slot>
         <span class="tooltiptext" v-bind:style="{'width': width, 'height': height}">
-            <slot></slot>
+            <slot name="content"></slot>
         </span>
     </div>
 </template>
@@ -12,17 +12,10 @@
 <script lang="ts">
 import { Vue, Prop, Component, Watch } from 'vue-property-decorator';
 
-enum MarkType {
-    Help,
-    Info,
-};
-
 @Component({
     name: 'tooltip',
 })
 export default class TooltipComponent extends Vue {
-    @Prop() type!: MarkType;
-
     @Prop() width!: number;
     @Prop() height!: number;
 
@@ -35,7 +28,8 @@ export default class TooltipComponent extends Vue {
 <style lang="scss">
 #tooltip {
     position: relative;
-    border-bottom: 1px dotted black;
+
+    display: inline;
 }
 
 #tooltip .tooltiptext {

@@ -211,7 +211,7 @@ export default class TreeComponent extends Vue {
         if (!this.selectPopup) {
             this.collectionToShow = this.hoveredCollection;
             this.collectionToShowHeight = this.collectionToShow.element.offsetHeight;
-            
+
             this.showPopup = true;
 
             let scrollableElement = this.$el.parentElement;

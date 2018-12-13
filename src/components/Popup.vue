@@ -32,36 +32,91 @@
         
         <div class="footer" v-if="record.isImageType()">
  
-            <button class="addImageHiPS" v-on:click="addCollection()">
-                <i class="fas fa-layer-group"></i>
-            </button>
+            <TooltipComponent :width="'150px'" :height="'60px'">
+                <template slot="hover-element">
+                    <button class="addImageHiPS" v-on:click="addCollection()">
+                        <i class="fas fa-layer-group"></i>
+                    </button>
+                </template>
 
-            <button class="addMOC" v-if="record.data.moc_access_url" v-on:click="$root.$emit('addCoverage', record.data)">
-                <i class="fas fa-map-marked-alt"></i>
-            </button>
+                <template slot="content">
+                    <p>Create a new HiPS image layer</p>
+                </template>
+            </TooltipComponent>
 
-            <form :action="record.propertiesFileUrl()" method="post" target="_blank">
-                <button><i class="fas fa-file"></i></button>
-            </form>
+            <TooltipComponent :width="'150px'" :height="'60px'">
+                <template slot="hover-element">
+                    <button class="addMOC" v-if="record.data.moc_access_url" v-on:click="$root.$emit('addCoverage', record.data)">
+                        <i class="fas fa-map-marked-alt"></i>
+                    </button>
+                </template>
 
+                <template slot="content">
+                    <p>Show the coverage map</p>
+                </template>
+            </TooltipComponent>
+
+            <TooltipComponent :width="'150px'" :height="'40px'">
+                <template slot="hover-element">
+                    <form :action="record.propertiesFileUrl()" method="post" target="_blank">
+                        <button><i class="fas fa-file"></i></button>
+                    </form>
+                </template>
+
+                <template slot="content">
+                    <p>See the metadatas</p>
+                </template>
+            </TooltipComponent>
         </div>
         <div class="footer" v-else>
+            <TooltipComponent :width="'150px'" :height="'60px'">
+                <template slot="hover-element">
+                    <button class="addCatalog" v-on:click="addCollection()">
+                        <i class="fas fa-layer-group"></i>
+                    </button>
+                </template>
 
-            <button class="addCatalog" v-on:click="addCollection()">
-                <i class="fas fa-layer-group"></i>
-            </button>
+                <template slot="content">
+                    <p>Create a catalog layer</p>
+                </template>
+            </TooltipComponent>
 
-            <button class="addMOC" v-if="record.data.moc_access_url" v-on:click="$root.$emit('addCoverage', record.data)">
-                <i class="fas fa-map-marked-alt"></i>
-            </button>
 
-            <form v-if="record.isVizierCatalog()" :action="record.obs_description_url" method="post" target="_blank">
-                <button><i class="fas fa-info"></i></button>
-            </form>
+            <TooltipComponent :width="'150px'" :height="'60px'">
+                <template slot="hover-element">
+                    <button class="addMOC" v-if="record.data.moc_access_url" v-on:click="$root.$emit('addCoverage', record.data)">
+                        <i class="fas fa-map-marked-alt"></i>
+                    </button>
+                </template>
 
-            <form :action="record.propertiesFileUrl()" method="post" target="_blank">
-                <button><i class="fas fa-file"></i></button>
-            </form>
+                <template slot="content">
+                    <p>Show the coverage map</p>
+                </template>
+            </TooltipComponent>
+
+            <TooltipComponent :width="'100px'" :height="'40px'">
+                <template slot="hover-element">
+                    <form v-if="record.isVizierCatalog()" :action="record.obs_description_url" method="post" target="_blank">
+                        <button><i class="fas fa-info"></i></button>
+                    </form>
+                </template>
+
+                <template slot="content">
+                    <p>VizieR</p>
+                </template>
+            </TooltipComponent>
+
+            <TooltipComponent :width="'150px'" :height="'40px'">
+                <template slot="hover-element">
+                    <form :action="record.propertiesFileUrl()" method="post" target="_blank">
+                        <button><i class="fas fa-file"></i></button>
+                    </form>
+                </template>
+
+                <template slot="content">
+                    <p>See the metadatas</p>
+                </template>
+            </TooltipComponent>
 
         </div>
         
@@ -73,6 +128,7 @@ import { Vue, Prop, Component, Watch } from 'vue-property-decorator';
 import { RetrieveRecordCollectionQuery } from './../MOCServerQuery';
 import { Viewport } from './../Viewport';
 import { HeaderSelectionEvent } from './Collection.vue';
+import TooltipComponent from './Tooltip.vue';
 import { isNullOrUndefined } from 'util';
 import QuitComponent from './QuitIcon.vue';
 
@@ -149,6 +205,7 @@ class Record {
     name: 'popup-component',
     components: {
         QuitComponent,
+        TooltipComponent,
     },
 })
 export default class PopupComponent extends Vue {
@@ -339,6 +396,8 @@ $size-tail: 10px;
                 left: 50%;
                 transform: translate(-50%, -50%);
             }
+
+            cursor: pointer;
         }
 
 

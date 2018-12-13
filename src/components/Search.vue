@@ -7,8 +7,14 @@
             <input @input="addKeywordsTag($event.target.value)"
                 v-model="search" placeholder="Search..." />
         </div>
-        <TooltipComponent v-bind:type="0" v-bind:width="'150px'" v-bind:height="'100px'"> 
-            <p>Search for specific collections by typing keywords (e.g. SDSS or AllWISE)</p>
+        <TooltipComponent :width="'150px'" :height="'100px'">
+            <template slot="hover-element">
+                <i class="fa fa-question-circle question-icon" style="font-size:24px"></i>
+            </template>
+
+            <template slot="content">
+                <p>Search for specific collections by typing keywords (e.g. SDSS or AllWISE)</p>
+            </template>
         </TooltipComponent>
     </div>
 </template>
