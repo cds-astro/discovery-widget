@@ -130,7 +130,7 @@ export class TreeViewportMOCServerQuery extends MOCServer {
 }
 
 export class TreeFilterMOCServerQuery extends MOCServer {
-    public static getUrl(filter: Map<string, Array<Tag>>): string {
+    public static getUrl(filter: Map<string, Array<Tag>>, exclusion: boolean): string {
 
         let url = MOCServer.URL +
         'get=record&' +
@@ -165,7 +165,13 @@ export class TreeFilterMOCServerQuery extends MOCServer {
                         }
                     }
                 } else {
-                    url += '(' + encodeURIComponent(key) + encodeURIComponent(operator) + encodeURIComponent(value) + '||' + encodeURIComponent(key) + '!=*' + ')';
+                    url += '(' + encodeURIComponent(key) + encodeURIComponent(operator) + encodeURIComponent(value);
+                
+                    if (exclusion) {
+                        url += ')';
+                    } else {
+                        url += '||' + encodeURIComponent(key) + '!=*' + ')';
+                    }
                 }
                 i++;
             
@@ -176,8 +182,8 @@ export class TreeFilterMOCServerQuery extends MOCServer {
         return url;
     }
 
-    public static send(caller: any, filter: Map<string, Array<Tag>>): void {
-        const url = this.getUrl(filter);
+    public static send(caller: any, filter: Map<string, Array<Tag>>, excludePlausibleCollection: boolean = false): void {
+        const url = this.getUrl(filter, excludePlausibleCollection);
         MOCServer.query(url, caller, 'filterTree');
     }
 }

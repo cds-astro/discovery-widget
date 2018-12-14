@@ -11,7 +11,8 @@
     <FilterComponent 
         :updatedTagsFromWidget="sendTagsToFilter"
         :numRemainingDatasets="root.numberOfCatalogs"
-        @updateFilterTags="updateTags($event.key, $event.tags)">
+        @updateFilterTags="updateTags($event.key, $event.tags)"
+        @excludePlausibleCollection="setExcludePlausibleCollections($event)">
     </FilterComponent>
 
     <div v-show="tagsList.length > 0" id="filter-tags">
@@ -483,6 +484,9 @@ export default class WidgetComponent extends Vue {
     /* Loading flag enabled when a HTTP request has been sent to the MOCServer, not received and not processed */
     private isLoading: boolean = false;
 
+    /* Say to the MOCServer we do not want to retrieve collections that have not the specific metadatas used for filtering */
+    private excludePlausibleCollection: boolean = false;
+
     public mounted() {
         console.log('Tree component MOUNTED'); 
         this.$root.$on('updateViewer', (args: any[]) => {
@@ -613,7 +617,7 @@ export default class WidgetComponent extends Vue {
     }
 
     private queryMOCServerOnFilter(): void {
-        TreeFilterMOCServerQuery.send(this, this.tags);
+        TreeFilterMOCServerQuery.send(this, this.tags, this.excludePlausibleCollection);
     }
 
     private sliceHeaders(args: any) {
@@ -685,6 +689,11 @@ export default class WidgetComponent extends Vue {
 
     public setLoading(isLoading: boolean) {
         this.isLoading = isLoading;
+    }
+
+    public setExcludePlausibleCollections(excludePlausibleCollection: boolean) {
+        this.excludePlausibleCollection=excludePlausibleCollection;
+        this.queryMOCServerOnFilter();
     }
 }
 </script>
@@ -825,7 +834,7 @@ p {
 
 #widget-title {
     text-align: center;
-    margin: 5px;
+    margin: 7px;
 
     * {
         display: inline-block;

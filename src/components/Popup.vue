@@ -258,11 +258,10 @@ $size-tail: 10px;
     transform: translate($size-tail, -$size-tail);
     position: absolute;
 
-
     background-color: white;
     color: black;
     list-style-type: none;
-    width: 150%;
+    width: 180%;
 
     border-radius: 4px;
     border: 1px solid gray;
@@ -344,7 +343,6 @@ $size-tail: 10px;
         }
 
         #content {
-            
             #title {
                 margin: 0px 10px;
                 padding: 10px 5px;
@@ -380,7 +378,6 @@ $size-tail: 10px;
     }
 
     .footer {
-
         form {
             display: inline-block;
             margin: 0;

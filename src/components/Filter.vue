@@ -2,12 +2,40 @@
 
 <template>
     <div id="filter">
-        <div @click="showForm = !showForm" id="icon">
-            <i class="fas fa-filter"></i>
-            <p>Filter</p>
-            <p class="num-datasets" v-if="numRemainingDatasets > 0" :style="{color: 'green'}">({{ numRemainingDatasets }}) datasets</p>
-            <p class="num-datasets" v-else :style="{color: 'red'}">({{ numRemainingDatasets }}) datasets</p>
+        <div id="shower">
+            <div @click="showForm = !showForm" id="icon">
+                <i class="fas fa-filter"></i>
+                <p>Filter</p>
+                <TooltipComponent v-if="!excludePlausibleCollection" v-bind:width="'150px'" v-bind:height="'120px'">
+                    <template slot="hover-element">
+                        <toggle-button id="toggler" v-model="excludePlausibleCollection"
+                            color="#3498db"
+                            :sync="true"
+                            :labels="true"/>
+                    </template>
+
+                    <template slot="content">
+                        <p >Click to retrieve the subset of collections that <u>totally</u> matches the filtering query</p>
+                    </template>
+                </TooltipComponent>
+                <TooltipComponent v-else v-bind:width="'150px'" v-bind:height="'100px'">
+                    <template slot="hover-element">
+                        <toggle-button id="toggler" v-model="excludePlausibleCollection"
+                            color="#3498db"
+                            :sync="true"
+                            :labels="true"/>
+                    </template>
+
+                    <template slot="content">
+                        <p>Click to retrieve the collections that <u>partially</u> match the filtering query</p>
+                    </template>
+                </TooltipComponent>
+
+                <p class="num-datasets" v-if="numRemainingDatasets > 0" :style="{color: 'green'}">({{ numRemainingDatasets }}) datasets</p>
+                <p class="num-datasets" v-else :style="{color: 'red'}">({{ numRemainingDatasets }}) datasets</p>
+            </div>
         </div>
+
         <div v-show="showForm" id="form">
             <QuitComponent v-on:quit="showForm=false"></QuitComponent>
 
@@ -59,7 +87,7 @@
                         <option>m</option>
                     </select>
                     
-                    <TooltipComponent v-bind:type="0" v-bind:width="'504px'" v-bind:height="'385px'">
+                    <TooltipComponent :width="'504px'" :height="'385px'">
                         <template slot="hover-element">
                             <i class="fa fa-question-circle question-icon" style="font-size:24px"></i>
                         </template>
@@ -130,8 +158,9 @@ import { dateToMJD } from './../utils';
 import { isNullOrUndefined, isNull } from 'util';
 import VCalendar from 'v-calendar';
 import 'v-calendar/lib/v-calendar.min.css';
-import Multiselect from 'vue-multiselect'
+import Multiselect from 'vue-multiselect';
 import 'vue-multiselect/dist/vue-multiselect.min.css';
+import ToggleButton from 'vue-js-toggle-button/src/Button.vue';
 
 // Use v-calendar, v-date-picker & v-popover components
 Vue.use(VCalendar, {
@@ -158,6 +187,7 @@ export class Tag {
         TooltipComponent,
         VCalendar,
         Multiselect,
+        ToggleButton,
     },
 })
 export default class FilterComponent extends Vue {
@@ -655,6 +685,14 @@ export default class FilterComponent extends Vue {
             });
         }
     }
+
+    private excludePlausibleCollection: boolean = false;
+    @Watch('excludePlausibleCollection')
+    public changePlausibleCollectionExclusion(excludePlausibleCollection: boolean, old: boolean) {
+        this.excludePlausibleCollection = excludePlausibleCollection;
+
+        this.$emit('excludePlausibleCollection', excludePlausibleCollection);
+    }
 }
 </script>
 
@@ -666,21 +704,25 @@ $pos-y-lang: 20px;
     position: relative;
 }
 
-#filter #icon {
-    padding: 10px;
+#filter #shower {
     border-top: 1px solid gainsboro;
 
-    * {
-        display: inline;
-    }
+    #icon {
+        padding: 10px;
+        flex: 1;
 
-    p {
-        margin: 0px 5px;
-    }
+        * {
+            display: inline-block;
+        }
 
-    p.num-datasets {
-        float: right;
-        color: green;
+        p {
+            margin: 0px 5px;
+        }
+
+        p.num-datasets {
+            float: right;
+            color: green;
+        }
     }
 }
 
