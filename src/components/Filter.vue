@@ -52,7 +52,7 @@
                         :close-on-select="false"
                         :clear-on-select="false"
                         :preserve-search="true"
-                        placeholder="Pick one or several regimes"></multiselect>
+                        placeholder="Pick/type one or several regimes"></multiselect>
                 </div>
 
                 <div class="metadata">
@@ -80,7 +80,7 @@
                     <i class="fas fa-broadcast-tower"></i>
                     <label>Em :</label>
 
-                    <vue-slider ref="slider" v-model="em_value" @drag-end="changeEmValues($event.value)" v-bind="options" v-bind:width="'100%'"></vue-slider>
+                    <vue-slider id="slider" ref="slider" v-model="em_value" @drag-end="changeEmValues($event.value)" v-bind="options" v-bind:width="'100%'"></vue-slider>
                     <select id="unit" v-on:change="changeEmUnit($event.target.value);">
                         <option>eV</option>
                         <option>Hz</option>
@@ -114,7 +114,6 @@
  
             </div>
 
-            
             <div class="part">
                 <h3>Catalogs only</h3>
                 <div class="metadata">                    
@@ -128,7 +127,7 @@
                         :close-on-select="false"
                         :clear-on-select="false"
                         :preserve-search="true"
-                        placeholder="Pick one or several missions"></multiselect>
+                        placeholder="Pick/type one or several missions"></multiselect>
                 </div>
 
                 <div class="metadata">
@@ -142,7 +141,7 @@
                         :close-on-select="false"
                         :clear-on-select="false"
                         :preserve-search="true"
-                        placeholder="Pick one or several optical astronomys"></multiselect>
+                        placeholder="Pick/type one or several optical astronomys"></multiselect>
                 </div>
             </div>
         </div>
@@ -397,6 +396,7 @@ export default class FilterComponent extends Vue {
     private bandwidthList = [
         'Radio',
         'Infrared',
+        'Millimeter',
         'Optical',
         'Gas-lines',
         'UV',
@@ -781,11 +781,25 @@ $pos-y-lang: 20px;
         border-top: 1px solid gainsboro;
 
         i {
-            font-size: 22px;
+            font-size: 20px;
         }
 
         label {
             white-space:nowrap;
+        }
+
+        #slider {
+            width: 100%;
+        }
+
+        select {
+            background-color: whitesmoke;
+            outline: none;
+            padding: 5px 5px;
+            border: 1px solid gainsboro;
+            border-radius: 4px;
+
+            margin: 0px 5px;
         }
 
         .multisct {

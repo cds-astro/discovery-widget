@@ -158,10 +158,12 @@ export class TreeFilterMOCServerQuery extends MOCServer {
                     const kws = value.split(' ');
                     for(let j = 0; j < kws.length; j++) {
                         let kw = kws[j];
+                        let kw_url = encodeURIComponent('(obs_title=*' + kw + '*||obs_id=*' + kw + '*||obs_collection=*' + kw + '*||bib_reference=*' + kw + '*)');
+
                         if(j == 0) {
-                            url += encodeURIComponent('(obs_title=*' + kw + '*||obs_id=*' + kw + '*||obs_collection=*' + kw + '*)');
+                            url += kw_url;
                         } else {
-                            url += encodeURIComponent('&&(obs_title=*' + kw + '*||obs_id=*' + kw + '*||obs_collection=*' + kw + '*)');
+                            url += encodeURIComponent('&&') + kw_url;
                         }
                     }
                 } else {

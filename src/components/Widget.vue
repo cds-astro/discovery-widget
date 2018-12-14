@@ -6,7 +6,7 @@
     <div id="widget-title">
         <i v-if="!isLoading" class="fas fa-database"></i>
         <i v-else class="fas fa-spinner fa-spin"></i>
-        <h3>Database collection</h3>
+        <h3>Collections database</h3>
     </div>
     <FilterComponent 
         :updatedTagsFromWidget="sendTagsToFilter"
@@ -91,6 +91,37 @@ export class Tree {
     public children: Tree[];
     public parent: Tree;
     public ID: string;
+    
+    /* Hardcoded labels */
+    public label: string;
+    private static labels: Map<string, string> = new Map<string, string>([
+        ['B', 'Copies of external databases, regularly updated'],
+        ['I', 'Astrometric Data'],
+        ['II', 'Photometric Data'],
+        ['III', 'Spectroscopic Data'],
+        ['IV', 'Cross-Identifications'],
+        ['V', 'Combined data'],
+        ['VI', 'Miscellaneous'],
+        ['VII', 'Non-stellar Objects'],
+        ['VIII', 'Radio and Far-IR data'],
+        ['IX', 'High-Energy data'],
+        ['J', 'Journals'],
+        ['A+A', 'Astronomy and Astrophysics'],
+        ['A+AS', 'Astronomy and Astrophysics Supplement Series'],
+        ['AcA', 'Acta Astronomica'],
+        ['AJ', 'Astronomical Journal'],
+        ['AN', 'Astronomische Nachrichten'],
+        ['ApJ', 'Astrophysical Journal'],
+        ['ApJS', 'Astrophysical Journal Supplement Series'],
+        ['AZh', 'Astronomicheskii Zhurnal (Russian)'],
+        ['BaltA', 'Baltic Astronomy'],
+        ['MNRAS', 'Monthly Notices of the Royal Astronomical Society'],
+        ['other', 'publications from other journals'],
+        ['PASJ', 'Publications of the Astronomical Society of Japan'],
+        ['PASP', 'Publications of the Astronomical Society of the Pacific'],
+        ['PAZh', 'Pis\'ma v Astronomicheskii Zhurnal (Astronomy Letters)'],
+    ]);
+
     public catalogs: Map<ID, Map<ID, HeaderDatasetType>>;
 
     public catalogsList: Array<Map<ID, HeaderDatasetType>>;
@@ -98,7 +129,7 @@ export class Tree {
     public numberOfCatalogs: number;
     public inViewport: boolean;
 
-    constructor(ID: string, parent: Tree) {
+    constructor(ID: string, parent: Tree, label: string = "") {
         this.children = [];
         this.ID = ID;
         this.catalogs = new Map<ID, Map<ID, HeaderDatasetType>>();
@@ -107,6 +138,7 @@ export class Tree {
         this.inViewport = false;
         this.numberOfCatalogs = 0;
         this.parent = parent;
+        this.label = label;
     }
 
     public getPath(): String[] {
@@ -275,7 +307,11 @@ export class Tree {
 
             let existingChild = this.getChild(id);
             if (isNull(existingChild)) {
-                existingChild = new Tree(id, this);
+                let label = Tree.labels.get(id);
+                if (isNullOrUndefined(label)) {
+                    label = '';
+                }
+                existingChild = new Tree(id, this, label);
                 this.children.push(existingChild);
             }
 
@@ -784,6 +820,7 @@ export default class WidgetComponent extends Vue {
     ul {
         margin: 0;
         padding: 0;
+
         li {
             display: inline-block;
             padding: 2px;

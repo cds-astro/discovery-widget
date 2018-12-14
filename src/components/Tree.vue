@@ -19,14 +19,18 @@
                         //root = child;
                         $emit('addToPath', child.ID);">
                     <!-- Leaf so print the collections -->
-                    <p  v-if="child.inViewport"
+                    <div v-if="child.inViewport"
                         v-bind:style="{color: 'green'}">
-                        {{ child.ID }} {{ '(' + child.numberOfCatalogs + ')' }}
-                    </p>
-                    <p  v-else
+                        <p>{{ child.ID }}</p>
+                        <p class="label" v-if="child.label">{{ ' - ' + child.label }}</p>
+                        <p>{{ ' (' + child.numberOfCatalogs + ')' }}</p>
+                    </div>
+                    <div v-else
                         v-bind:style="{color: 'red'}">
-                        {{ child.ID }} {{ '(' + child.numberOfCatalogs + ')' }}
-                    </p>
+                        <p>{{ child.ID }}</p>
+                        <p class="label" v-if="child.label">{{ ' - ' + child.label }}</p>
+                        <p>{{ ' (' + child.numberOfCatalogs + ')' }}</p>
+                    </div>
                 </li>
             </ul>
             <ul>
@@ -286,5 +290,23 @@ export default class TreeComponent extends Vue {
     position: absolute;
     left: 100%;
     height: 100%;
+}
+
+#tree-component {
+    #noleaf {
+        ul li {
+            div {
+                position: relative;
+
+                p {
+                    display: inline;
+                    
+                    &.label {
+                        font-style: italic;
+                    }
+                }
+            }
+        }
+    }
 }
 </style>

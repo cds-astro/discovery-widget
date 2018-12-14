@@ -4,16 +4,21 @@
     <div id="search-component">
         <p>Keywords: </p>
         <div class="wrap">
-            <input @input="addKeywordsTag($event.target.value)"
-                v-model="search" placeholder="Search..." />
+            <input type="text" @input="addKeywordsTag($event.target.value)"
+                v-model="search" placeholder="Search..."/>
         </div>
-        <TooltipComponent :width="'150px'" :height="'100px'">
+        <TooltipComponent :width="'310px'" :height="'80px'">
             <template slot="hover-element">
                 <i class="fa fa-question-circle question-icon" style="font-size:24px"></i>
             </template>
 
             <template slot="content">
-                <p>Search for specific collections by typing keywords (e.g. SDSS or AllWISE)</p>
+                <p>Search for specific collections by typing:
+                    <ul style="text-align: left;">
+                        <li>keywords (e.g. SDSS or AllWISE)</li>
+                        <li>a bibcode (e.g. 1978A&AS...34..477M)</li>
+                    </ul>
+                </p>
             </template>
         </TooltipComponent>
     </div>
@@ -74,6 +79,9 @@ export default class SearchComponent extends Vue {
 </script>
 
 <style lang="scss">
+
+$text-input-h: 20px;
+
 #search-component {
     display: flex;
     align-items: center;
@@ -82,17 +90,28 @@ export default class SearchComponent extends Vue {
 
     .wrap {
         margin: 0px 10px;
+        position: relative;
 
-        input {
+        input[type=text] {
+            padding: 7px $text-input-h;
             width: 100%;
-            color: gray;
-
-            border-radius: 2px;
+            background-color: whitesmoke;
+            border-radius: 3px;
             border: 1px solid gainsboro;
+            color: gray;
+        }
 
-            padding: 5px;
-
-            font-family: Helvetica, Arial, sans-serif;
+        &:after {
+            position: absolute;
+            display: inline-block;
+            top: 50%;
+            left: 2px;
+            transform: translate(0, -50%);
+            color: black;
+            
+            font-family: FontAwesome;
+            font-size: $text-input-h;
+            content:"\f002";
         }
     }
 }
