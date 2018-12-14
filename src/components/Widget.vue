@@ -3,7 +3,11 @@
 <template>
 <div id="widget-component" v-bind:style="{ top: offsetTop.toString() + 'px' }">
     <QuitComponent v-on:quit="$emit('quit')"></QuitComponent>
-    <h3 id="title">Collection Selection Tool</h3>
+    <div id="widget-title">
+        <i v-if="!isLoading" class="fas fa-database"></i>
+        <i v-else class="fas fa-spinner fa-spin"></i>
+        <h3>Database collection</h3>
+    </div>
     <FilterComponent 
         :updatedTagsFromWidget="sendTagsToFilter"
         :numRemainingDatasets="root.numberOfCatalogs"
@@ -476,6 +480,9 @@ export default class WidgetComponent extends Vue {
     private tagsList: Array<Tag> = [];
     private sendTagsToFilter: Map<string, Array<Tag>> = this.tags;
 
+    /* Loading flag enabled when a HTTP request has been sent to the MOCServer, not received and not processed */
+    private isLoading: boolean = false;
+
     public mounted() {
         console.log('Tree component MOUNTED'); 
         this.$root.$on('updateViewer', (args: any[]) => {
@@ -587,7 +594,7 @@ export default class WidgetComponent extends Vue {
         // Query the MOCServer for retrieving all the dataset headers
         // This list will always be plotted but we will see whether each dataset
         // falls into the viewport or not.
-        RetrieveAllDatasetHeadersQuery.query(this);
+        RetrieveAllDatasetHeadersQuery.send(this);
 
         setInterval(() => {
             /* A request to the the MOCServer is performed only if the position of the view has not
@@ -598,7 +605,7 @@ export default class WidgetComponent extends Vue {
                     this.needToUpdateMenu = false;
 
                     const viewport = this.viewport;
-                    TreeViewportMOCServerQuery.query(this, viewport);
+                    TreeViewportMOCServerQuery.send(this, viewport);
                     this.lastTimePositionChanged = currentTime;
                 }
             }
@@ -606,7 +613,7 @@ export default class WidgetComponent extends Vue {
     }
 
     private queryMOCServerOnFilter(): void {
-        TreeFilterMOCServerQuery.query(this, this.tags);
+        TreeFilterMOCServerQuery.send(this, this.tags);
     }
 
     private sliceHeaders(args: any) {
@@ -674,6 +681,10 @@ export default class WidgetComponent extends Vue {
         this.sendTagsToFilter = new Map<string, Array<Tag>>(this.tags);
 
         this.queryMOCServerOnFilter();
+    }
+
+    public setLoading(isLoading: boolean) {
+        this.isLoading = isLoading;
     }
 }
 </script>
@@ -801,18 +812,32 @@ ul {
     margin: 0;
 }
 
-p, h3, h4 {
-    font-family: Helvetica, Arial, sans-serif;
+p, h4, h3 {
+    font-family: Helvetica,Arial,sans-serif;
     margin: 0;
 }
 
 p {
     font-size: 14px;
     line-height: 1.3;
+    margin: 0;
 }
 
-#title {
+#widget-title {
     text-align: center;
-    margin: 15px;
+    margin: 5px;
+
+    * {
+        display: inline-block;
+        vertical-align: middle;
+    }
+
+    i {
+        font-size: 24px;
+    }
+
+    h3 {
+        margin-left: 5px;
+    }
 }
 </style>

@@ -34,19 +34,19 @@
  
             <TooltipComponent :width="'150px'" :height="'60px'">
                 <template slot="hover-element">
-                    <button class="addImageHiPS" v-on:click="addCollection()">
+                    <button class="add addImageHiPS" v-on:click="addCollection()">
                         <i class="fas fa-layer-group"></i>
                     </button>
                 </template>
 
                 <template slot="content">
-                    <p>Create a new HiPS image layer</p>
+                    <p>Add this HiPS image to a new layer</p>
                 </template>
             </TooltipComponent>
 
             <TooltipComponent :width="'150px'" :height="'60px'">
                 <template slot="hover-element">
-                    <button class="addMOC" v-if="record.data.moc_access_url" v-on:click="$root.$emit('addCoverage', record.data)">
+                    <button class="add addMOC" v-if="record.data.moc_access_url" v-on:click="$root.$emit('addCoverage', record.data)">
                         <i class="fas fa-map-marked-alt"></i>
                     </button>
                 </template>
@@ -59,7 +59,7 @@
             <TooltipComponent :width="'150px'" :height="'40px'">
                 <template slot="hover-element">
                     <form :action="record.propertiesFileUrl()" method="post" target="_blank">
-                        <button><i class="fas fa-file"></i></button>
+                        <button class="info"><i class="fas fa-file"></i></button>
                     </form>
                 </template>
 
@@ -71,20 +71,20 @@
         <div class="footer" v-else>
             <TooltipComponent :width="'150px'" :height="'60px'">
                 <template slot="hover-element">
-                    <button class="addCatalog" v-on:click="addCollection()">
+                    <button class="add addCatalog" v-on:click="addCollection()">
                         <i class="fas fa-layer-group"></i>
                     </button>
                 </template>
 
                 <template slot="content">
-                    <p>Create a catalog layer</p>
+                    <p>Add this catalog to a new layer</p>
                 </template>
             </TooltipComponent>
 
 
             <TooltipComponent :width="'150px'" :height="'60px'">
                 <template slot="hover-element">
-                    <button class="addMOC" v-if="record.data.moc_access_url" v-on:click="$root.$emit('addCoverage', record.data)">
+                    <button class="add addMOC" v-if="record.data.moc_access_url" v-on:click="$root.$emit('addCoverage', record.data)">
                         <i class="fas fa-map-marked-alt"></i>
                     </button>
                 </template>
@@ -97,7 +97,7 @@
             <TooltipComponent :width="'100px'" :height="'40px'">
                 <template slot="hover-element">
                     <form v-if="record.isVizierCatalog()" :action="record.obs_description_url" method="post" target="_blank">
-                        <button><i class="fas fa-info"></i></button>
+                        <button class="info"><i class="fas fa-info"></i></button>
                     </form>
                 </template>
 
@@ -109,7 +109,7 @@
             <TooltipComponent :width="'150px'" :height="'40px'">
                 <template slot="hover-element">
                     <form :action="record.propertiesFileUrl()" method="post" target="_blank">
-                        <button><i class="fas fa-file"></i></button>
+                        <button class="info"><i class="fas fa-file"></i></button>
                     </form>
                 </template>
 
@@ -220,7 +220,7 @@ export default class PopupComponent extends Vue {
     public showPopup(collection: HeaderSelectionEvent, oldCollection: HeaderSelectionEvent) {
         console.log('show popup', collection);
         if (collection) {
-            RetrieveRecordCollectionQuery.query(this, collection.header.ID);
+            RetrieveRecordCollectionQuery.send(this, collection.header.ID);
         }
     }
 
@@ -344,17 +344,37 @@ $size-tail: 10px;
         }
 
         #content {
+            
             #title {
                 margin: 0px 10px;
                 padding: 10px 5px;
                 border-bottom: 3px solid gray;
+                text-align: center;
             }
 
             #description {
                 margin-top: 5px;
                 overflow-y: scroll;
-                text-align:justify;
                 max-height: 150px;
+                text-align: justify;
+
+                p {  
+                    /* These are technically the same, but use both */
+                    overflow-wrap: break-word;
+                    word-wrap: break-word;
+
+                    -ms-word-break: break-all;
+                    /* This is the dangerous one in WebKit, as it breaks things wherever */
+                    word-break: break-all;
+                    /* Instead use this non-standard one: */
+                    word-break: break-word;
+
+                    /* Adds a hyphen where the word breaks, if supported (No Blink) */
+                    -ms-hyphens: auto;
+                    -moz-hyphens: auto;
+                    -webkit-hyphens: auto;
+                    hyphens: auto;
+                }
             }
         }
     }
@@ -373,8 +393,6 @@ $size-tail: 10px;
             border: none;
             color: white;
             
-            background: #3498db;
-            
             border-radius: 4px;
             width: 36px;
             height: 36px;
@@ -385,9 +403,20 @@ $size-tail: 10px;
             vertical-align: middle;
 
             margin-right: 5px;
+            
+            &.info {
+                background-color: #3498db;
+                
+                &:hover {
+                    background-color: #4ab7ff;
+                }
+            }
+            &.add {
+                background-color: green;
 
-            &:hover {
-                background-color: #386786;
+                &:hover {
+                    background-color: rgb(24, 189, 24);
+                }
             }
 
             i {

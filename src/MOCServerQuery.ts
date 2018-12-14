@@ -3,12 +3,18 @@ import { Viewport } from './Viewport';
 import { Tag } from './components/Filter.vue';
 import { isNullOrUndefined } from 'util';
 
+import WidgetComponent from './components/Widget.vue';
+
 abstract class MOCServer {
     public static URL: string = 'http://alasky.unistra.fr/MocServer/query?';
 
-    public static query(url: string, caller: any, event: string): void {
+    public static query(url: string, caller: any, event: string, loading: boolean = true): void {
         console.log(url);
-        MOCServer.httpRequest(url, caller, event);
+        /* Say to the caller component that a http request to the MOCServer is launched */
+        if (loading) {
+            caller.setLoading(true);
+        }
+        MOCServer.httpRequest(url, caller, event, loading);
     }
 
     private static callback(response: string, caller: any, event: string): void {
@@ -18,7 +24,7 @@ abstract class MOCServer {
         caller.$root.$emit(event, result);
     }
 
-    private static httpRequest(url: string, caller: any, event: string): void {
+    private static httpRequest(url: string, caller: any, event: string, loading: boolean): void {
         const xmlHttp = new XMLHttpRequest();
         // let bodyElement = document.getElementsByTagName("BODY")[0] as HTMLElement;
         // bodyElement.style.cursor = 'progress';
@@ -28,7 +34,9 @@ abstract class MOCServer {
                 if (xmlHttp.status === 200) {
                 const response = xmlHttp.responseText;
                 MOCServer.callback(response, caller, event);
-
+                if (loading) {
+                    caller.setLoading(false);
+                }
                 // Vue.js 2.0 does not support iterating through a HashMap.
                 // This should be supported by Vue.js 3.0.
                 // We currently have to use v-for="key in Array.from(map.keys())" + $forceUpdate the tree
@@ -115,7 +123,7 @@ export class TreeViewportMOCServerQuery extends MOCServer {
         return url;
     }
 
-    public static query(caller: any, vp: Viewport): void {
+    public static send(caller: any, vp: Viewport): void {
         const url = this.getUrl(vp);
         MOCServer.query(url, caller, 'viewportTree');
     }
@@ -168,7 +176,7 @@ export class TreeFilterMOCServerQuery extends MOCServer {
         return url;
     }
 
-    public static query(caller: any, filter: Map<string, Array<Tag>>): void {
+    public static send(caller: any, filter: Map<string, Array<Tag>>): void {
         const url = this.getUrl(filter);
         MOCServer.query(url, caller, 'filterTree');
     }
@@ -185,7 +193,7 @@ export class RetrieveAllDatasetHeadersQuery extends MOCServer {
         return url;
     }
 
-    public static query(caller: any): void {
+    public static send(caller: any): void {
         const url = this.getUrl();
         MOCServer.query(url, caller, 'retrieveAllDatasetHeaders');
     }
@@ -203,8 +211,8 @@ export class RetrieveRecordCollectionQuery extends MOCServer {
         return url;
     }
 
-    public static query(caller: any, id: string): void {
+    public static send(caller: any, id: string): void {
         const url = this.getUrl(id);
-        MOCServer.query(url, caller, 'retrieveRecordCollection');
+        MOCServer.query(url, caller, 'retrieveRecordCollection', false);
     }
 }
