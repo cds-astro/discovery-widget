@@ -37,7 +37,7 @@ export default class TooltipComponent extends Vue {
     
     background-color: white;
     color: black;
-    text-align: center;
+
     border-radius: 2px;
     padding: 10px;
 
@@ -52,6 +52,9 @@ export default class TooltipComponent extends Vue {
 
     border: 1px solid gainsboro;
 
+    ul {
+        padding: 0px 1em;
+    }
     img {
         width: 100%;
         height: 100%;

@@ -7,7 +7,7 @@
             <input type="text" @input="addKeywordsTag($event.target.value)"
                 v-model="search" placeholder="Search..."/>
         </div>
-        <TooltipComponent :width="'310px'" :height="'80px'">
+        <TooltipComponent>
             <template slot="hover-element">
                 <i class="fa fa-question-circle question-icon" style="font-size:24px"></i>
             </template>

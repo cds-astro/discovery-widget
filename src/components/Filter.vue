@@ -52,7 +52,7 @@
                         :close-on-select="false"
                         :clear-on-select="false"
                         :preserve-search="true"
-                        placeholder="Pick/type one or several regimes"></multiselect>
+                        placeholder="Pick/type one or several"></multiselect>
                 </div>
 
                 <div class="metadata">
@@ -127,7 +127,7 @@
                         :close-on-select="false"
                         :clear-on-select="false"
                         :preserve-search="true"
-                        placeholder="Pick/type one or several missions"></multiselect>
+                        placeholder="Pick/type one or several"></multiselect>
                 </div>
 
                 <div class="metadata">
@@ -141,7 +141,7 @@
                         :close-on-select="false"
                         :clear-on-select="false"
                         :preserve-search="true"
-                        placeholder="Pick/type one or several optical astronomys"></multiselect>
+                        placeholder="Pick/type one or several"></multiselect>
                 </div>
             </div>
         </div>
@@ -736,14 +736,12 @@ $pos-y-lang: 20px;
     left: 100%;
     top: 50%;
     
-
-    
     transform: translate($size-lang, -$size-lang) translateY(-$pos-y-lang);
 
     background-color: white;
     border: 1px solid gray;
     width: 450px;
-    padding: 10px;
+    padding: 0px 10px;
 }
 
 #filter #form:after {
@@ -773,7 +771,8 @@ $pos-y-lang: 20px;
     }
 
     .metadata {
-        padding: 25px 10px;
+        height: 90px;
+        padding: 0px 10px;
         display: flex;
 
         align-items: center;
@@ -802,9 +801,6 @@ $pos-y-lang: 20px;
             margin: 0px 5px;
         }
 
-        .multisct {
-            z-index: 6;
-        }
 
         .multiselect__tag, .multiselect__option--highlight, .multiselect__option--highlight:after {
             background-color: #3498db;
@@ -813,6 +809,7 @@ $pos-y-lang: 20px;
         .multiselect__select {
             background-color: gainsboro;
             padding: 5px;
+            z-index: auto;
         }
 
         .input-date {

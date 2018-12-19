@@ -824,9 +824,9 @@ export default class WidgetComponent extends Vue {
         li {
             display: inline-block;
             padding: 2px;
-
-            margin: 2px;
             
+            margin: 2px;
+
             background-color: #3498db;
             color: black;
             border-radius: 3px;
@@ -840,7 +840,6 @@ export default class WidgetComponent extends Vue {
 
             a.delete-tag {
                 display: inline-block;
-                
                 margin: 1px;
             }
 

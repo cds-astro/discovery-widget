@@ -27,11 +27,29 @@
 
                 <div v-if="record.description" id="description"><p>{{ record.description }}</p></div>
                 <div v-else id="description"><p>No description</p></div>
+                
+                <div v-if="record.bib_reference" id="bibcode">
+                    <i class="fas fa-scroll"></i>
+
+                    <TooltipComponent :width="'100px'" :height="'50px'">
+                        <template slot="hover-element">
+                            <ul v-if="record.bib_reference instanceof Array">
+                                <li v-for="bib in record.bib_reference">
+                                    <a v-bind:href="'https://ui.adsabs.harvard.edu/#abs/' + bib + '/abstract'" target="_blank"><u>{{ bib }}</u></a>
+                                </li>
+                            </ul>
+                            <a v-else v-bind:href="'https://ui.adsabs.harvard.edu/#abs/' + record.bib_reference + '/abstract'" target="_blank"><u>{{ record.bib_reference }}</u></a>
+                        </template>
+
+                        <template slot="content">
+                            <p>link to ADS</p>
+                        </template>
+                    </TooltipComponent>
+                </div>
             </div>
         </div>
         
         <div class="footer" v-if="record.isImageType()">
- 
             <TooltipComponent :width="'150px'" :height="'60px'">
                 <template slot="hover-element">
                     <button class="add addImageHiPS" v-on:click="addCollection()">
@@ -117,9 +135,7 @@
                     <p>See the metadatas</p>
                 </template>
             </TooltipComponent>
-
         </div>
-        
     </div>
 </template>
 
@@ -355,6 +371,9 @@ $size-tail: 10px;
                 overflow-y: scroll;
                 max-height: 150px;
                 text-align: justify;
+                
+                border: 1px solid gainsboro;
+                color: gray;
 
                 p {  
                     /* These are technically the same, but use both */
@@ -372,6 +391,22 @@ $size-tail: 10px;
                     -moz-hyphens: auto;
                     -webkit-hyphens: auto;
                     hyphens: auto;
+                }
+            }
+
+            #bibcode {
+                i {
+                    display: inline-block;
+                    font-size: 22px;
+                    vertical-align: middle;
+                    margin-right: 3px;
+                }
+
+                a {
+                    color: #3498db;
+                    display: inline-block;
+                    font-style: italic;
+                    vertical-align: middle;
                 }
             }
         }
@@ -425,8 +460,6 @@ $size-tail: 10px;
 
             cursor: pointer;
         }
-
-
     }
 
     #tail {
