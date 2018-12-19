@@ -144,39 +144,50 @@ export class TreeFilterMOCServerQuery extends MOCServer {
         url += '&expr='
         let i = 0;
         for (let [key, tags] of filter.entries()) {
-                const operator = tags[0].operator;
-                let values = [];
-                tags.forEach(tag => {
-                    values.push(tag.value);
-                });
-                let value = values.join(',');
+            const operator = tags[0].operator;
+            let values = [];
+            tags.forEach(tag => {
+                values.push(tag.value);
+            });
+            let value = values.join(',');
 
-                if(i > 0) {
-                    url += encodeURIComponent('&&');
-                }
-                if(key === "keywords") {
-                    const kws = value.split(' ');
-                    for(let j = 0; j < kws.length; j++) {
-                        let kw = kws[j];
-                        let kw_url = encodeURIComponent('(obs_title=*' + kw + '*||obs_id=*' + kw + '*||obs_collection=*' + kw + '*||bib_reference=*' + kw + '*)');
+            if(i > 0) {
+                url += encodeURIComponent('&&');
+            }
+            if(key === "keywords") {
+                const kws = value.split(' ');
+                for(let j = 0; j < kws.length; j++) {
+                    let kw = kws[j];
+                    let kw_url = encodeURIComponent('(obs_title=*' + kw + '*||obs_id=*' + kw + '*||obs_collection=*' + kw + '*||bib_reference=*' + kw + '*)');
 
-                        if(j == 0) {
-                            url += kw_url;
-                        } else {
-                            url += encodeURIComponent('&&') + kw_url;
-                        }
+                    if(j == 0) {
+                        url += kw_url;
+                    } else {
+                        url += encodeURIComponent('&&') + kw_url;
                     }
+                }
+            } else {
+                if (key === 't_min') {
+                    url += '(t_max' + encodeURIComponent('>=') + encodeURIComponent(value);
+                } else if (key === 't_max') {
+                    url += '(t_min' + encodeURIComponent('<=') + encodeURIComponent(value);
                 } else {
                     url += '(' + encodeURIComponent(key) + encodeURIComponent(operator) + encodeURIComponent(value);
-                
-                    if (exclusion) {
-                        url += ')';
+                }
+
+                if (exclusion) {
+                    url += ')';
+                } else {
+                    if (key === 't_min') {
+                        url += '||t_max!=*)';
+                    } else if (key === 't_max') {
+                        url += '||t_min!=*)';
                     } else {
                         url += '||' + encodeURIComponent(key) + '!=*' + ')';
                     }
                 }
-                i++;
-            
+            }
+            i++;
         }
 
         console.log('FITLER URL', url);
