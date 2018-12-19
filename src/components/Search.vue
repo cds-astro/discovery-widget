@@ -95,7 +95,7 @@ $text-input-h: 20px;
         input[type=text] {
             padding: 7px $text-input-h;
             width: 100%;
-            background-color: whitesmoke;
+            background-color: white;
             border-radius: 3px;
             border: 1px solid gainsboro;
             color: gray;

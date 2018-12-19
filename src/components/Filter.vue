@@ -6,7 +6,7 @@
             <div @click="showForm = !showForm" id="icon">
                 <i class="fas fa-filter"></i>
                 <p>Filter</p>
-                <TooltipComponent v-if="!excludePlausibleCollection" v-bind:width="'150px'" v-bind:height="'120px'">
+                <TooltipComponent v-if="!excludePlausibleCollection">
                     <template slot="hover-element">
                         <toggle-button id="toggler" v-model="excludePlausibleCollection"
                             color="#3498db"
@@ -18,7 +18,7 @@
                         <p >Click to retrieve the subset of collections that <u>totally</u> matches the filtering query</p>
                     </template>
                 </TooltipComponent>
-                <TooltipComponent v-else v-bind:width="'150px'" v-bind:height="'100px'">
+                <TooltipComponent v-else>
                     <template slot="hover-element">
                         <toggle-button id="toggler" v-model="excludePlausibleCollection"
                             color="#3498db"
@@ -45,7 +45,7 @@
                     <i class="fas fa-wifi"></i>
                     <label>Bandwidth :</label>
 
-                    <multiselect class="multisct" v-model="regime"
+                    <multiselect v-model="regime"
                         :options="bandwidthList"
                         :multiple="true"
                         :searchable="true"
@@ -120,7 +120,7 @@
                     <i class="fas fa-space-shuttle"></i>
                     <label>Mission :</label>
 
-                    <multiselect class="multisct" v-model="mission"
+                    <multiselect v-model="mission"
                         :options="missionList"
                         :multiple="true"
                         :searchable="true"
@@ -788,6 +788,7 @@ $pos-y-lang: 20px;
         }
 
         #slider {
+            z-index: 0;
             width: 100%;
         }
 
@@ -800,7 +801,6 @@ $pos-y-lang: 20px;
 
             margin: 0px 5px;
         }
-
 
         .multiselect__tag, .multiselect__option--highlight, .multiselect__option--highlight:after {
             background-color: #3498db;

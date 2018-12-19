@@ -51,6 +51,7 @@ export default class TooltipComponent extends Vue {
     margin-left: 5px;
 
     border: 1px solid gainsboro;
+    white-space: nowrap;
 
     ul {
         padding: 0px 1em;
