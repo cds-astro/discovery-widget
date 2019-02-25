@@ -24,7 +24,7 @@ Currently, the Sky Survey Discovery Tree comprises the following features:
 - The display of fundamental informations of the datasets such as a description of the catalog/HiPS sky survey, a preview image of the observations density/survey depending on whether it is a catalog or a image sky survey. The user can choose to plot a sky survey/catalog on the web portal view along with its coverage map, inspect its characteristics directly on the [CDS MOCServer](http://alasky.unistra.fr/MocServer/query) and inspect its bibcode on [ADS](https://ui.adsabs.harvard.edu/).
 ![DatasetSelection](https://github.com/cds-astro/discovery-widget/blob/master/misc/sky_survey_selection.png)
 
-*Popup when the user moves the mouse on the catalog*
+*A description popup appears when the user moves the mouse on the name of the dataset*
 
 ## Contribution
 
