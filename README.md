@@ -1,6 +1,8 @@
-# collection-tree
+# Sky Catalogs/Surveys Discovery Tree
 
-## Project setup
+## 
+
+## Contribution
 ```
 npm install
 ```
