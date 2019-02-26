@@ -1,14 +1,14 @@
-# [Sky Surveys Discovery Tree](http://cdsportal.u-strasbg.fr/moctree/)
+# [Sky Data Collections Discovery Tree](http://cdsportal.u-strasbg.fr/moctree/)
 
-The Sky Surveys Discovery Tree is a new embeddable web portal component. It allows a fast and easy retrival of astronomical catalogs and image sky surveys. This component follows what has been done in Aladin desktop, allowing the user to search for specific catalogs/sky surveys by browsing a tree. The component is currently developped with Aladin-lite but aims at becoming embeddable in other web portals (i.e. firefly) in the future.
+The Sky Data Collections Discovery Tree (abbreviated as **discovery tree** in next sections) is a new embeddable web portal component. It allows a fast and easy retrival of astronomical catalogs and image sky surveys. This component follows what has been done in Aladin desktop, allowing the user to search for specific catalogs/sky surveys by browsing a tree. The component is currently developped with Aladin-lite but aims at becoming embeddable in other web portals (i.e. firefly) in the future.
 
 ## Where can I test it ?
 
-The Sky Survey Discovery Tree can be tested at this [link](http://cdsportal.u-strasbg.fr/moctree/)
+The discovery tree can be tested at this [link](http://cdsportal.u-strasbg.fr/moctree/)
 
 ## Features
 
-Currently, the Sky Surveys Discovery Tree comprises the following features:
+Currently, the discovery tree comprises the following features:
 
 - A discrete icon for opening/closing the discovery tree. ![Icon](https://github.com/cds-astro/discovery-widget/blob/master/misc/open_close_icon.png)
 - A hierarchical browsing tree reducing the amount of catalogs/sky surveys being printed at once.
