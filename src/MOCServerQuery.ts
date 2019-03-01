@@ -7,47 +7,53 @@ import WidgetComponent from './components/Widget.vue';
 
 abstract class MOCServer {
     public static URL: string = 'http://alasky.unistra.fr/MocServer/query?';
+    public static lastFilterEventUrl: string;
 
     public static query(url: string, caller: any, event: string, loading: boolean = true): void {
+        if (event === 'filterTree') {
+            // Register the time when the query is sent to the MOCServer
+            MOCServer.lastFilterEventUrl = url;
+        }
         console.log(url);
         /* Say to the caller component that a http request to the MOCServer is launched */
         if (loading) {
             caller.setLoading(true);
         }
-        MOCServer.httpRequest(url, caller, event, loading);
-    }
 
-    private static callback(response: string, caller: any, event: string): void {
-        // Parse the JSON to get an object
-        const result = JSON.parse(response);
-        // Send the result to the component that did the query
-        caller.$root.$emit(event, result);
-    }
+        let promise = new Promise((resolve, reject) => {
+            const xhr = new XMLHttpRequest();
+            xhr.open("GET", url);
+            xhr.onload = () => resolve(xhr.responseText);
+            xhr.onerror = () => reject(xhr.statusText);
+            xhr.send();
+        });
 
-    private static httpRequest(url: string, caller: any, event: string, loading: boolean): void {
-        const xmlHttp = new XMLHttpRequest();
-        // let bodyElement = document.getElementsByTagName("BODY")[0] as HTMLElement;
-        // bodyElement.style.cursor = 'progress';
-
-        xmlHttp.onreadystatechange = () => {
-            if (xmlHttp.readyState === 4) {
-                if (xmlHttp.status === 200) {
-                const response = xmlHttp.responseText;
-                MOCServer.callback(response, caller, event);
-                if (loading) {
-                    caller.setLoading(false);
+        promise.then((result) => {
+            console.log('EVENT: ', event);
+            // Check whether the last url sent corresponds to this one
+            if (event !== 'filterTree') {
+                MOCServer.callback(result as string, caller, event, loading);
+            } else {
+                // If a filter tree event has been launched
+                // then lastFilterEventUrl is defined 
+                if (url === MOCServer.lastFilterEventUrl) {
+                    console.log(url, event);
+                    MOCServer.callback(result as string, caller, event, loading);
                 }
-                // Vue.js 2.0 does not support iterating through a HashMap.
-                // This should be supported by Vue.js 3.0.
-                // We currently have to use v-for="key in Array.from(map.keys())" + $forceUpdate the tree
-                // each time an http request has been done
-                // this.$forceUpdate();
-                }
-                // bodyElement.style.cursor = 'default';
             }
-        };
-        xmlHttp.open('GET', url, true); // true for asynchronous
-        xmlHttp.send();
+        }).catch(function(val) {
+            console.log(val)
+        });
+    }
+
+    public static callback(result: string, caller: any, event: string, loading: boolean = true) {
+        // Parse the JSON to get an object
+        const response = JSON.parse(result as string);
+        // Send the result to the component that did the query
+        caller.$root.$emit(event, response);
+        if (loading) {
+            caller.setLoading(false);
+        }
     }
 }
 
@@ -137,7 +143,8 @@ export class TreeFilterMOCServerQuery extends MOCServer {
         'fmt=json&' +
         'fields=ID, obs_id, obs_title, client_category, dataproduct_type, vizier_popularity&' +
         'casesensitive=false';
-        if (filter.size == 0) {
+        // If no filtering tags or if the filter is toggled off
+        if (filter.size == 0 || !exclusion) {
             return url;
         }
 
@@ -168,23 +175,11 @@ export class TreeFilterMOCServerQuery extends MOCServer {
                 }
             } else {
                 if (key === 't_min') {
-                    url += '(t_max' + encodeURIComponent('>=') + encodeURIComponent(value);
+                    url += '(t_max' + encodeURIComponent('>=') + encodeURIComponent(value) + '||t_max!=*)';
                 } else if (key === 't_max') {
-                    url += '(t_min' + encodeURIComponent('<=') + encodeURIComponent(value);
+                    url += '(t_min' + encodeURIComponent('<=') + encodeURIComponent(value) + '||t_min!=*)';
                 } else {
-                    url += '(' + encodeURIComponent(key) + encodeURIComponent(operator) + encodeURIComponent(value);
-                }
-
-                if (exclusion) {
-                    url += ')';
-                } else {
-                    if (key === 't_min') {
-                        url += '||t_max!=*)';
-                    } else if (key === 't_max') {
-                        url += '||t_min!=*)';
-                    } else {
-                        url += '||' + encodeURIComponent(key) + '!=*' + ')';
-                    }
+                    url += '(' + encodeURIComponent(key) + encodeURIComponent(operator) + encodeURIComponent(value) + '||' + encodeURIComponent(key) + '!=*' + ')';
                 }
             }
             i++;
