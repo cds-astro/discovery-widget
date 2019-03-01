@@ -15,7 +15,7 @@
                     </template>
 
                     <template slot="content">
-                        <p >Click to retrieve the subset of collections that <u>totally</u> matches the filtering query</p>
+                        <p>Enable the filter</p>
                     </template>
                 </TooltipComponent>
                 <TooltipComponent v-else>
@@ -27,12 +27,12 @@
                     </template>
 
                     <template slot="content">
-                        <p>Click to retrieve the collections that <u>partially</u> match the filtering query</p>
+                        <p>Disable the filter</p>
                     </template>
                 </TooltipComponent>
 
-                <p class="num-datasets" v-if="numRemainingDatasets > 0" :style="{color: 'green'}">({{ numRemainingDatasets }}) datasets</p>
-                <p class="num-datasets" v-else :style="{color: 'red'}">({{ numRemainingDatasets }}) datasets</p>
+                <p class="num-datasets" v-if="numRemainingDatasets > 0" :style="{color: 'green'}">{{ numRemainingDatasets }} datasets</p>
+                <p class="num-datasets" v-else :style="{color: 'red'}">{{ numRemainingDatasets }} datasets</p>
             </div>
         </div>
 
@@ -686,7 +686,7 @@ export default class FilterComponent extends Vue {
         }
     }
 
-    private excludePlausibleCollection: boolean = false;
+    private excludePlausibleCollection: boolean = true;
     @Watch('excludePlausibleCollection')
     public changePlausibleCollectionExclusion(excludePlausibleCollection: boolean, old: boolean) {
         this.excludePlausibleCollection = excludePlausibleCollection;
@@ -760,7 +760,6 @@ $pos-y-lang: 20px;
 }
 
 #filter #form .part {
-
     h3 {
         padding: 5px 0px;
         border-bottom: 2px solid gainsboro;
@@ -771,7 +770,7 @@ $pos-y-lang: 20px;
     }
 
     .metadata {
-        height: 90px;
+        height: 80px;
         padding: 0px 10px;
         display: flex;
 

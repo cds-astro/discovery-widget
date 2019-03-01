@@ -16,8 +16,16 @@
     </FilterComponent>
 
     <div v-show="tagsList.length > 0" id="filter-tags">
-        <ul>
-            <li v-for="tag in tagsList">
+        <ul v-if="excludePlausibleCollection">
+            <li v-for="tag in tagsList" v-bind:style="{ 'background-color': '#3498db' }">
+                <p>{{ tag.repr }}</p>
+                <a @click="removeTag(tag)" class="delete-tag">
+                    <i class="fa fa-times fa-lg"></i>
+                </a>
+            </li>
+        </ul>
+        <ul v-else>
+            <li v-for="tag in tagsList" v-bind:style="{ 'background-color': 'rgb(191, 203, 217)' }">
                 <p>{{ tag.repr }}</p>
                 <a @click="removeTag(tag)" class="delete-tag">
                     <i class="fa fa-times fa-lg"></i>
@@ -520,8 +528,8 @@ export default class WidgetComponent extends Vue {
     /* Loading flag enabled when a HTTP request has been sent to the MOCServer, not received and not processed */
     private isLoading: boolean = false;
 
-    /* Say to the MOCServer we do not want to retrieve collections that have not the specific metadatas used for filtering */
-    private excludePlausibleCollection: boolean = false;
+    /* Enable the filter by default */
+    private excludePlausibleCollection: boolean = true;
 
     public mounted() {
         console.log('Tree component MOUNTED'); 
@@ -728,7 +736,7 @@ export default class WidgetComponent extends Vue {
     }
 
     public setExcludePlausibleCollections(excludePlausibleCollection: boolean) {
-        this.excludePlausibleCollection=excludePlausibleCollection;
+        this.excludePlausibleCollection = excludePlausibleCollection;
         this.queryMOCServerOnFilter();
     }
 }
