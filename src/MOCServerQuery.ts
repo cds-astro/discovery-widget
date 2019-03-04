@@ -37,7 +37,6 @@ abstract class MOCServer {
                 // If a filter tree event has been launched
                 // then lastFilterEventUrl is defined 
                 if (url === MOCServer.lastFilterEventUrl) {
-                    console.log(url, event);
                     MOCServer.callback(result as string, caller, event, loading);
                 }
             }

@@ -16,7 +16,7 @@
                     {{ tableName(i - 1) }}
                 </p>
                 <p v-else
-                    :style="{color: 'red'}">
+                    :style="{color: 'DarkOrange'}">
                     {{ tableName(i - 1) }}
                 </p>
             </li>
@@ -142,7 +142,7 @@ export default class CollectionComponent extends Vue {
             }
         });
 
-        return res ? 'green' : 'red';
+        return res ? 'green' : 'DarkOrange';
     }
 
     private isVizierCatalog(): boolean {

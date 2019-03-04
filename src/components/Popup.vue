@@ -128,7 +128,7 @@
                     </template>
 
                     <template slot="content">
-                        <p>See the metadatas</p>
+                        <p>See the metadata</p>
                     </template>
                 </TooltipComponent>
             </div>

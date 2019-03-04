@@ -26,7 +26,7 @@
                         <p>{{ ' (' + child.numberOfCatalogs + ')' }}</p>
                     </div>
                     <div v-else
-                        v-bind:style="{color: 'red'}">
+                        v-bind:style="{color: 'DarkOrange'}">
                         <p>{{ child.ID }}</p>
                         <p class="label" v-if="child.label">{{ ' - ' + child.label }}</p>
                         <p>{{ ' (' + child.numberOfCatalogs + ')' }}</p>

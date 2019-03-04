@@ -852,7 +852,7 @@ export default class WidgetComponent extends Vue {
             }
 
             a.delete-tag:hover {
-                color: red;
+                color: DarkOrange;
                 cursor: pointer;
             }
         }

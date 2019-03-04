@@ -62,18 +62,6 @@ export default class TooltipComponent extends Vue {
     }
 }
 
-/*
-#tooltip .tooltiptext:after {
-    content: " ";
-    position: absolute;
-    top: 50%;
-    right: 100%;
-    margin-top: -5px;
-    border-width: 5px;
-    border-style: solid;
-    border-color: transparent red transparent transparent;
-}
-*/
 #tooltip:hover .tooltiptext {
     visibility: visible;
 }
