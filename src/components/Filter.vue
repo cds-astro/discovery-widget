@@ -31,8 +31,8 @@
                     </template>
                 </TooltipComponent>
 
-                <p class="num-datasets" v-if="numRemainingDatasets > 0" :style="{color: 'green'}">{{ numRemainingDatasets }} datasets</p>
-                <p class="num-datasets" v-else :style="{color: 'red'}">{{ numRemainingDatasets }} datasets</p>
+                <p class="num-datasets" v-if="numRemainingDatasets > 0" :style="{color: 'green'}">{{ numRemainingDatasets }} / {{ numAllDatasets }} datasets</p>
+                <p class="num-datasets" v-else :style="{color: 'red'}">{{ numRemainingDatasets }} / {{ numAllDatasets }} datasets</p>
             </div>
         </div>
 
@@ -195,6 +195,8 @@ export default class FilterComponent extends Vue {
     }
 
     private tags: Map<string, Array<Tag>> = new Map<string, Array<Tag>>();
+
+    @Prop() numAllDatasets!: number;
 
     @Prop() updatedTagsFromWidget!: Map<string, Array<Tag>>;
     @Watch('updatedTagsFromWidget')

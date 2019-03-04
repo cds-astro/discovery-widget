@@ -6,10 +6,11 @@
     <div id="widget-title">
         <i v-if="!isLoading" class="fas fa-database"></i>
         <i v-else class="fas fa-spinner fa-spin"></i>
-        <h3>Collections database</h3>
+        <h3>Sky Data Discovery Tree</h3>
     </div>
     <FilterComponent 
         :updatedTagsFromWidget="sendTagsToFilter"
+        :numAllDatasets="numAllDatasets"
         :numRemainingDatasets="root.numberOfCatalogs"
         @updateFilterTags="updateTags($event.key, $event.tags)"
         @excludePlausibleCollection="setExcludePlausibleCollections($event)">
@@ -490,6 +491,8 @@ export default class WidgetComponent extends Vue {
     private tableToCat: Map<string, string> = new Map<string, string>();
     private tableToNode: Map<string, Tree> = new Map<string, Tree>();
 
+    private numAllDatasets: number = 0;
+
     // Used by the template
     private cataloguesToShow: Array<Map<ID, HeaderDatasetType>> = [];
     private cataloguesList: Array<Map<ID, HeaderDatasetType>> = [];
@@ -631,7 +634,7 @@ export default class WidgetComponent extends Vue {
             console.log('SORT END');
 
             // Compute the number of catalogs
-            this.root.numberCatalogs();
+            this.numAllDatasets = this.root.numberCatalogs();
             console.log('The TREE', this.root);
 
             // Num of catalogues
@@ -852,7 +855,7 @@ export default class WidgetComponent extends Vue {
             }
 
             a.delete-tag:hover {
-                color: DarkOrange;
+                color: red;
                 cursor: pointer;
             }
         }

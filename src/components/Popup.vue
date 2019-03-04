@@ -50,7 +50,7 @@
                 <TooltipComponent>
                     <template slot="hover-element">
                         <button class="add addImageHiPS" v-on:click="addCollection()">
-                            <i class="fas fa-layer-group"></i>
+                            <i class="fas fa-plus"></i>
                         </button>
                     </template>
 
@@ -87,7 +87,7 @@
                 <TooltipComponent>
                     <template slot="hover-element">
                         <button class="add addCatalog" v-on:click="addCollection()">
-                            <i class="fas fa-layer-group"></i>
+                            <i class="fas fa-plus"></i>
                         </button>
                     </template>
 
@@ -111,7 +111,7 @@
                 <TooltipComponent>
                     <template slot="hover-element">
                         <form v-if="record.isVizierCatalog()" :action="record.obs_description_url" method="post" target="_blank">
-                            <button class="info"><i class="fas fa-info"></i></button>
+                            <button class="info vizier"></button>
                         </form>
                     </template>
 
@@ -327,10 +327,10 @@ $size-tail: 10px;
                 }
 
                 img:after {
-                    content: "\f127" " not available";
-                    font-size: 12px;
+                    content: "\f127" " no preview";
+                    font-size: 15px;
                     font-family: FontAwesome;
-                    color: black;
+                    color: crimson;
                     display: block;
                     position: absolute;
                     z-index: 2;
@@ -461,6 +461,13 @@ $size-tail: 10px;
 
                     margin-right: 5px;
                     
+                    &.vizier {
+                        background-image: url("http://cdsarc.u-strasbg.fr/vizier/cds-navbar-resources/img/vizier_blackx30px.png");
+                        background-position: center center;
+
+                        background-repeat: no-repeat;
+                    }
+
                     &.info {
                         background-color: #3498db;
                         
@@ -468,11 +475,12 @@ $size-tail: 10px;
                             background-color: #4ab7ff;
                         }
                     }
+
                     &.add {
-                        background-color: green;
+                        background-color: rgb(24, 189, 24);
 
                         &:hover {
-                            background-color: rgb(24, 189, 24);
+                            background-color: #A3E40D;
                         }
                     }
 

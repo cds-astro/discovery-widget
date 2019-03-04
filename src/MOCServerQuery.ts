@@ -174,11 +174,11 @@ export class TreeFilterMOCServerQuery extends MOCServer {
                 }
             } else {
                 if (key === 't_min') {
-                    url += '(t_max' + encodeURIComponent('>=') + encodeURIComponent(value) + '||t_max!=*)';
+                    url += '(t_max' + encodeURIComponent('>=') + encodeURIComponent(value) + ')';
                 } else if (key === 't_max') {
-                    url += '(t_min' + encodeURIComponent('<=') + encodeURIComponent(value) + '||t_min!=*)';
+                    url += '(t_min' + encodeURIComponent('<=') + encodeURIComponent(value) + ')';
                 } else {
-                    url += '(' + encodeURIComponent(key) + encodeURIComponent(operator) + encodeURIComponent(value) + '||' + encodeURIComponent(key) + '!=*' + ')';
+                    url += '(' + encodeURIComponent(key) + encodeURIComponent(operator) + encodeURIComponent(value) + ')';
                 }
             }
             i++;

@@ -4,7 +4,7 @@
     <div id="panel-icon">
         <a id="open"
             v-on:click="showCollectionTree = !showCollectionTree"
-            v-bind:style="{top: offsetTop.toString() + 'px'}"><i class="fa fa-database"></i></a>
+            v-bind:style="{top: offsetTop.toString() + 'px'}"><i class="fas fa-database"></i></a>
         <WidgetComponent v-show="showCollectionTree"
             v-on:quit="showCollectionTree=false"
             v-bind:offsetTop="offsetTop"></WidgetComponent>
@@ -36,7 +36,7 @@ export default class PanelIconComponent extends Vue {
     position: absolute;
     width: 32px;
     height: 32px;
-    left: 4px;
+    left: 5px;
 
     background: rgba(250,250,250,0.8);
     border-radius: 4px;
@@ -52,7 +52,7 @@ export default class PanelIconComponent extends Vue {
 }
 
 #open:hover {
-    background-color: darkgray;
+    background-color: #888;
 }
 
 @import url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css");
