@@ -167,19 +167,19 @@ Vue.use(VCalendar, {
 });
 
 export class Tag {
+
+    public operator: string;
+    public value: string;
+    public repr: string;
     constructor(operator: string, value: string, repr: string) {
         this.operator = operator;
         this.value = value;
         this.repr = repr;
     }
-
-    public operator: string;
-    public value: string;
-    public repr: string;
 }
 
 @Component({
-    name: 'filter',
+    name: 'filter-tool',
     components: {
         QuitComponent,
         vueSlider,
@@ -190,86 +190,49 @@ export class Tag {
     },
 })
 export default class FilterComponent extends Vue {
-    public mounted() {
-        console.log('Filter component MOUNTED');
+
+    private static convertMeterToFreq(m: number): number {
+        const c = 299792458.0;
+        return c / m;
     }
 
-    private tags: Map<string, Array<Tag>> = new Map<string, Array<Tag>>();
-
-    @Prop() numAllDatasets!: number;
-
-    @Prop() updatedTagsFromWidget!: Map<string, Array<Tag>>;
-    @Watch('updatedTagsFromWidget')
-    public changeTagsFromWidget(newTags: Map<string, Array<Tag>>, oldTags: Map<string, Array<Tag>>) {
-        this.tags = newTags;
-
-        // regime
-        this.regime = [];
-        let obs_regime = this.tags.get('obs_regime');
-        if (!isNullOrUndefined(obs_regime)) {
-            let repr = [];
-            obs_regime.forEach(t => {
-                repr.push(t.repr);
-            });
-            this.regime = repr;
-        }
-
-        // mission
-        this.mission = [];
-        let obs_mission = this.tags.get('obs_mission');
-        if (!isNullOrUndefined(obs_mission)) {
-            let repr = [];
-            obs_mission.forEach(t => {
-                repr.push(t.repr);
-            });
-            this.mission = repr;
-        }
-
-        // astronomy
-        this.astronomy = [];
-        let obs_astronomy_kw = this.tags.get('obs_astronomy_kw');
-        if (!isNullOrUndefined(obs_astronomy_kw)) {
-            let repr = [];
-            obs_astronomy_kw.forEach(t => {
-                repr.push(t.repr);
-            });
-            this.astronomy = repr;
-        }
-
-        // t_min
-        let t_min = this.tags.get('t_min');
-        if (isNullOrUndefined(t_min)) {
-            this.minDate = this.attributes.min[0].dates;
-        }
-
-        // t_max
-        let t_max = this.tags.get('t_max');
-        if (isNullOrUndefined(t_max)) {
-            this.maxDate = this.attributes.max[0].dates;
-        }
-
-        // dataproduct_type
-        let dataproduct_type = this.tags.get('dataproduct_type');
-        if (isNullOrUndefined(dataproduct_type)) {
-            (this.$refs.imageCheckbox as HTMLInputElement).checked = true;
-            (this.$refs.catalogCheckbox as HTMLInputElement).checked = true;
-
-            this.showImage = true;
-            this.showCatalog = true;
-            this.disableImageCheckbox = false;
-            this.disableCatalogCheckbox = false;
-        }
+    private static convertFreqToMeter(f: number): number {
+        const c = 299792458.0;
+        return c / f;
     }
 
-    @Prop() numRemainingDatasets!: number;
+    private static convertMeterToEV(m: number): number {
+        const c = 299792458.0;
+        const h = 4.135667516 * 10e-15;
+
+        return h * c / m;
+    }
+
+    private static convertEVToMeter(E: number): number {
+        const c = 299792458.0;
+        const h = 4.135667516 * 10e-15;
+
+        return h * c / E;
+    }
+
+    private static convertFreqToEV(f: number): number {
+        const h = 4.135667516 * 10e-15;
+        return h * f;
+    }
+
+    private static convertEVToFreq(E: number): number {
+        const h = 4.135667516 * 10e-15;
+        return E / h;
+    }
+
+    @Prop() public numAllDatasets!: number;
+
+    @Prop() public updatedTagsFromWidget!: Map<string, Tag[]>;
+
+    @Prop() public numRemainingDatasets!: number;
+    private tags: Map<string, Tag[]> = new Map<string, Tag[]>();
 
     private showForm: boolean = false;
-    @Watch('showForm')
-    public changeShowForm(val: boolean, oldVal: boolean) {
-        if(val) {
-            this.$nextTick(() => (this.$refs.slider as any).refresh());
-        }
-    }
 
     /* TMIN/TMAX FILTERING */
     private minDate: Date = new Date(1970, 0, 1);
@@ -283,39 +246,7 @@ export default class FilterComponent extends Vue {
             key: 'today',
             dates: new Date(),
         }],
-    }
-    @Watch('minDate')
-    public changeMinDatePicker(date: Date, oldDate: Date) {
-        if (date !== this.attributes.min[0].dates) {
-            this.addLowerBoundDateFilterTag(date);
-        }
-    }
-
-    @Watch('maxDate')
-    public changeMaxDatePicker(date: Date, oldDate: Date) {
-        if (date !== this.attributes.max[0].dates) {
-            this.addUpperBoundDateFilterTag(date);
-        }
-    }
-    private addLowerBoundDateFilterTag(date: Date) {
-        let tag_min = new Tag('>=', dateToMJD(date).toString(), '>= ' + date.toDateString());
-    
-        this.tags.set('t_min', [tag_min]);
-        this.$emit('updateFilterTags', {
-            key: 't_min',
-            tags: [tag_min],
-        });
-    }
-
-    private addUpperBoundDateFilterTag(date: Date) {
-        let tag_max = new Tag('<=', dateToMJD(date).toString(), '<= ' + date.toDateString());
-
-        this.tags.set('t_max', [tag_max]);
-        this.$emit('updateFilterTags', {
-            key: 't_max',
-            tags: [tag_max],
-        });
-    }
+    };
 
     /* OBS_MISSION FILTERING */
     private missionList = [
@@ -334,30 +265,6 @@ export default class FilterComponent extends Vue {
         'EXOSAT',
     ];
     private mission: string[] = [];
-    @Watch('mission')
-    public changeMissionPicker(newMissions: string[], old: string[]) {
-        this.addMissionFilterTag(newMissions);
-    }
-
-    private addMissionFilterTag(newMissions: string[]) {
-        let tags = [];
-
-        newMissions.forEach(mission => {
-            const value = '*' + mission + '*';
-            const repr = mission;
-            const operator = '=';
-            
-            let newMissionTag = new Tag(operator, value, repr);
-            tags.push(newMissionTag);
-        });
-
-        this.tags.set('obs_mission', tags);
-        
-        this.$emit('updateFilterTags', {
-            key: 'obs_mission',
-            tags: tags,
-        });
-    }
 
     /* OBS_astronomy FILTERING */
     private astronomyList = [
@@ -366,33 +273,9 @@ export default class FilterComponent extends Vue {
         'AGN',
         'Associations',
         'Asteroseismology',
-        'Atomic_Data'
+        'Atomic_Data',
     ];
     private astronomy: string[] = [];
-    @Watch('astronomy')
-    public changeAstroPicker(newAstronomys: string[], old: string[]) {
-        this.addAstronomyFilterTag(newAstronomys);
-    }
-
-    private addAstronomyFilterTag(newAstronomys: string[]) {
-        let tags = [];
-
-        newAstronomys.forEach(astro => {
-            const value = '*' + astro + '*';
-            const repr = astro;
-            const operator = '=';
-            
-            let newAstroTag = new Tag(operator, value, repr);
-            tags.push(newAstroTag);
-        });
-
-        this.tags.set('obs_astronomy_kw', tags);
-        
-        this.$emit('updateFilterTags', {
-            key: 'obs_astronomy_kw',
-            tags: tags,
-        });
-    }
 
     /* OBS_REGIME FILTERING */
     private bandwidthList = [
@@ -406,44 +289,15 @@ export default class FilterComponent extends Vue {
         'Gamma-ray',
     ];
     private regime: string[] = [];
-    @Watch('regime')
-    public changeRegimePicker(newRegime: string[], oldRegime: string[]) {
-        this.addRegimeFilterTag(newRegime);
-    }
-
-    private addRegimeFilterTag(regimes: string[]) {
-        let tags = [];
-
-        regimes.forEach(regime => {
-            const value = '*' + regime + '*';
-            const repr = regime;
-            const operator = '=';
-            
-            let newRegimeTag = new Tag(operator, value, repr);
-            tags.push(newRegimeTag);
-        });
-
-        this.tags.set('obs_regime', tags);
-        
-        this.$emit('updateFilterTags', {
-            key: 'obs_regime',
-            tags: tags,
-        });
-    }
 
     /* EM_MIN/MAX FILTERING */
-    private ticks: Map<string, Array<string>> = new Map<string, Array<string>>([
-        ['eV', ["1e-9", "1e-7", "1e-5", "1e-3", "1e-1", "1e+1", "1e+3", "1e+5", "1e+7", "1e+9"]],
-        ['Hz', ["1e+5", "1e+7", "1e+9", "1e+11", "1e+13", "1e+15", "1e+17", "1e+19", "1e+21", "1e+23"]],
-        ['m', ["1e-13", "1e-11", "1e-9", "1e-7", "1e-5", "1e-3", "1e-1", "1e+1", "1e+3", "1e+5"]],
+    private ticks: Map<string, string[]> = new Map<string, string[]>([
+        ['eV', ['1e-9', '1e-7', '1e-5', '1e-3', '1e-1', '1e+1', '1e+3', '1e+5', '1e+7', '1e+9']],
+        ['Hz', ['1e+5', '1e+7', '1e+9', '1e+11', '1e+13', '1e+15', '1e+17', '1e+19', '1e+21', '1e+23']],
+        ['m', ['1e-13', '1e-11', '1e-9', '1e-7', '1e-5', '1e-3', '1e-1', '1e+1', '1e+3', '1e+5']],
     ]);
     private unit: string = 'eV';
-    private em_value: Array<string> = ["1e-9", "1e+9"];
-    private changeEmValues(em_value: string[]) {
-        this.em_value = em_value;
-        console.log('CHANGE EM');
-        this.addEmFilterTag(em_value);
-    }
+    private em_value: string[] = ['1e-9', '1e+9'];
 
     private options = {
         value: this.em_value,
@@ -451,10 +305,199 @@ export default class FilterComponent extends Vue {
         min: 1,
         max: 100,
         disabled: false,
-        tooltip: "always",
+        tooltip: 'always',
         piecewise: true,
         data: this.ticks.get('eV'),
-        formatter: "{value} eV",
+        formatter: '{value} eV',
+    };
+
+    /* DATAPRODUCT_TYPE FILTERING */
+    private showImage: boolean = true;
+    private showCatalog: boolean = true;
+    private disableImageCheckbox: boolean = false;
+    private disableCatalogCheckbox: boolean = false;
+
+    private excludePlausibleCollection: boolean = true;
+    @Watch('updatedTagsFromWidget')
+    public changeTagsFromWidget(newTags: Map<string, Tag[]>, oldTags: Map<string, Tag[]>) {
+        this.tags = newTags;
+
+        // regime
+        this.regime = [];
+        const obs_regime = this.tags.get('obs_regime');
+        if (!isNullOrUndefined(obs_regime)) {
+            const repr = [];
+            obs_regime.forEach((t) => {
+                repr.push(t.repr);
+            });
+            this.regime = repr;
+        }
+
+        // mission
+        this.mission = [];
+        const obs_mission = this.tags.get('obs_mission');
+        if (!isNullOrUndefined(obs_mission)) {
+            const repr = [];
+            obs_mission.forEach((t) => {
+                repr.push(t.repr);
+            });
+            this.mission = repr;
+        }
+
+        // astronomy
+        this.astronomy = [];
+        const obs_astronomy_kw = this.tags.get('obs_astronomy_kw');
+        if (!isNullOrUndefined(obs_astronomy_kw)) {
+            const repr = [];
+            obs_astronomy_kw.forEach((t) => {
+                repr.push(t.repr);
+            });
+            this.astronomy = repr;
+        }
+
+        // t_min
+        const t_min = this.tags.get('t_min');
+        if (isNullOrUndefined(t_min)) {
+            this.minDate = this.attributes.min[0].dates;
+        }
+
+        // t_max
+        const t_max = this.tags.get('t_max');
+        if (isNullOrUndefined(t_max)) {
+            this.maxDate = this.attributes.max[0].dates;
+        }
+
+        // dataproduct_type
+        const dataproduct_type = this.tags.get('dataproduct_type');
+        if (isNullOrUndefined(dataproduct_type)) {
+            (this.$refs.imageCheckbox as HTMLInputElement).checked = true;
+            (this.$refs.catalogCheckbox as HTMLInputElement).checked = true;
+
+            this.showImage = true;
+            this.showCatalog = true;
+            this.disableImageCheckbox = false;
+            this.disableCatalogCheckbox = false;
+        }
+    }
+    @Watch('showForm')
+    public changeShowForm(val: boolean, oldVal: boolean) {
+        if (val) {
+            this.$nextTick(() => (this.$refs.slider as any).refresh());
+        }
+    }
+    @Watch('minDate')
+    public changeMinDatePicker(date: Date, oldDate: Date) {
+        if (date !== this.attributes.min[0].dates) {
+            this.addLowerBoundDateFilterTag(date);
+        }
+    }
+
+    @Watch('maxDate')
+    public changeMaxDatePicker(date: Date, oldDate: Date) {
+        if (date !== this.attributes.max[0].dates) {
+            this.addUpperBoundDateFilterTag(date);
+        }
+    }
+    @Watch('mission')
+    public changeMissionPicker(newMissions: string[], old: string[]) {
+        this.addMissionFilterTag(newMissions);
+    }
+    @Watch('astronomy')
+    public changeAstroPicker(newAstronomys: string[], old: string[]) {
+        this.addAstronomyFilterTag(newAstronomys);
+    }
+    @Watch('regime')
+    public changeRegimePicker(newRegime: string[], oldRegime: string[]) {
+        this.addRegimeFilterTag(newRegime);
+    }
+    @Watch('excludePlausibleCollection')
+    public changePlausibleCollectionExclusion(excludePlausibleCollection: boolean, old: boolean) {
+        this.excludePlausibleCollection = excludePlausibleCollection;
+
+        this.$emit('excludePlausibleCollection', excludePlausibleCollection);
+    }
+    private addLowerBoundDateFilterTag(date: Date) {
+        const tag_min = new Tag('>=', dateToMJD(date).toString(), '>= ' + date.toDateString());
+
+        this.tags.set('t_min', [tag_min]);
+        this.$emit('updateFilterTags', {
+            key: 't_min',
+            tags: [tag_min],
+        });
+    }
+
+    private addUpperBoundDateFilterTag(date: Date) {
+        const tag_max = new Tag('<=', dateToMJD(date).toString(), '<= ' + date.toDateString());
+
+        this.tags.set('t_max', [tag_max]);
+        this.$emit('updateFilterTags', {
+            key: 't_max',
+            tags: [tag_max],
+        });
+    }
+
+    private addMissionFilterTag(newMissions: string[]) {
+        const tags = [];
+
+        newMissions.forEach((mission) => {
+            const value = '*' + mission + '*';
+            const repr = mission;
+            const operator = '=';
+
+            const newMissionTag = new Tag(operator, value, repr);
+            tags.push(newMissionTag);
+        });
+
+        this.tags.set('obs_mission', tags);
+
+        this.$emit('updateFilterTags', {
+            key: 'obs_mission',
+            tags,
+        });
+    }
+
+    private addAstronomyFilterTag(newAstronomys: string[]) {
+        const tags = [];
+
+        newAstronomys.forEach((astro) => {
+            const value = '*' + astro + '*';
+            const repr = astro;
+            const operator = '=';
+
+            const newAstroTag = new Tag(operator, value, repr);
+            tags.push(newAstroTag);
+        });
+
+        this.tags.set('obs_astronomy_kw', tags);
+
+        this.$emit('updateFilterTags', {
+            key: 'obs_astronomy_kw',
+            tags,
+        });
+    }
+
+    private addRegimeFilterTag(regimes: string[]) {
+        const tags = [];
+
+        regimes.forEach((regime) => {
+            const value = '*' + regime + '*';
+            const repr = regime;
+            const operator = '=';
+
+            const newRegimeTag = new Tag(operator, value, repr);
+            tags.push(newRegimeTag);
+        });
+
+        this.tags.set('obs_regime', tags);
+
+        this.$emit('updateFilterTags', {
+            key: 'obs_regime',
+            tags,
+        });
+    }
+    private changeEmValues(em_value: string[]) {
+        this.em_value = em_value;
+        this.addEmFilterTag(em_value);
     }
 
     private changeEmUnit(unit: string) {
@@ -470,7 +513,7 @@ export default class FilterComponent extends Vue {
                 a = FilterComponent.convertEVToFreq(a);
                 b = FilterComponent.convertEVToFreq(b);
             }
-        } else if(this.unit === 'Hz') {
+        } else if (this.unit === 'Hz') {
             if (unit === 'm') {
                 a = FilterComponent.convertFreqToMeter(a);
                 b = FilterComponent.convertFreqToMeter(b);
@@ -499,44 +542,10 @@ export default class FilterComponent extends Vue {
 
         this.options.data = this.ticks.get(unit);
         this.options.value = this.em_value;
-        this.options.formatter = "{value} " + unit;
+        this.options.formatter = '{value} ' + unit;
     }
 
-    private static convertMeterToFreq(m: number): number {
-        const c = 299792458.0;
-        return c / m;
-    }
-
-    private static convertFreqToMeter(f: number): number {
-        const c = 299792458.0;
-        return c / f;
-    }
-
-    private static convertMeterToEV(m: number): number {
-        const c = 299792458.0;
-        const h = 4.135667516*10e-15;
-
-        return h * c / m;
-    }
-
-    private static convertEVToMeter(E: number): number {
-        const c = 299792458.0;
-        const h = 4.135667516*10e-15;
-
-        return h * c / E;
-    }
-
-    private static convertFreqToEV(f: number): number {
-        const h = 4.135667516*10e-15;
-        return h * f;
-    }
-
-    private static convertEVToFreq(E: number): number {
-        const h = 4.135667516*10e-15;
-        return E / h;
-    }
-
-    private addEmFilterTag(em_value: Array<string>) {
+    private addEmFilterTag(em_value: string[]) {
         let em_min_unit = +em_value[0];
         let em_max_unit = +em_value[1];
 
@@ -563,7 +572,7 @@ export default class FilterComponent extends Vue {
             em_max_unit = tmp_unit;
         }
 
-        let tagEmMin = new Tag('>=', '', '');
+        const tagEmMin = new Tag('>=', '', '');
         tagEmMin.value = em_min.toString();
         if (this.unit === 'eV' || this.unit === 'Hz') {
             tagEmMin.repr = '<=' + em_min_unit.toExponential(3).toString() + ' ' + this.unit;
@@ -571,7 +580,7 @@ export default class FilterComponent extends Vue {
             tagEmMin.repr = '>=' + em_min_unit.toExponential(3).toString() + ' ' + this.unit;
         }
 
-        let tagEmMax = new Tag('<=', '', '');
+        const tagEmMax = new Tag('<=', '', '');
         tagEmMax.value = em_max.toString();
         tagEmMax.repr = tagEmMax.operator + em_max_unit.toExponential(3).toString() + ' ' + this.unit;
         if (this.unit === 'eV' || this.unit === 'Hz') {
@@ -580,7 +589,7 @@ export default class FilterComponent extends Vue {
             tagEmMax.repr = '<=' + em_max_unit.toExponential(3).toString() + ' ' + this.unit;
         }
 
-        let ticks = this.ticks.get(this.unit);
+        const ticks = this.ticks.get(this.unit);
         if (em_value[0] !== ticks[0]) {
             if (this.unit === 'eV' || this.unit === 'Hz') {
                 this.tags.set('em_max', [tagEmMax]);
@@ -642,12 +651,6 @@ export default class FilterComponent extends Vue {
         }
     }
 
-    /* DATAPRODUCT_TYPE FILTERING */
-    private showImage: boolean = true;
-    private showCatalog: boolean = true;
-    private disableImageCheckbox: boolean = false;
-    private disableCatalogCheckbox: boolean = false;
-
     private addDataTypeFilterTag(type: string, checked: boolean) {
         if (type === 'image' && !this.disableImageCheckbox) {
             this.showImage = checked;
@@ -670,7 +673,7 @@ export default class FilterComponent extends Vue {
                 tags: [],
             });
         } else {
-            let tagDataproductType = new Tag('=', '*', '');
+            const tagDataproductType = new Tag('=', '*', '');
             if (this.showCatalog) {
                 tagDataproductType.value = 'catalog';
                 tagDataproductType.repr = 'catalog';
@@ -686,14 +689,6 @@ export default class FilterComponent extends Vue {
                 tags: [tagDataproductType],
             });
         }
-    }
-
-    private excludePlausibleCollection: boolean = true;
-    @Watch('excludePlausibleCollection')
-    public changePlausibleCollectionExclusion(excludePlausibleCollection: boolean, old: boolean) {
-        this.excludePlausibleCollection = excludePlausibleCollection;
-
-        this.$emit('excludePlausibleCollection', excludePlausibleCollection);
     }
 }
 </script>

@@ -24,19 +24,22 @@ import WidgetComponent from './Widget.vue';
 export default class PanelIconComponent extends Vue {
     private showCollectionTree: boolean = false;
     private offsetTop: number = 100;
-
-    public mounted() {
-        console.log('Panel icon component MOUNTED');
-    }
 }
 </script>
 
 <style>
+#panel-icon {
+    position: absolute;
+    z-index: 5;
+        top: 6px;
+}
+
 #open {
     position: absolute;
     width: 32px;
     height: 32px;
-    left: 5px;
+    left: 4px;
+
 
     background: rgba(250,250,250,0.8);
     border-radius: 4px;

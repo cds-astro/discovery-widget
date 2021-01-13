@@ -61,7 +61,7 @@
 
                 <TooltipComponent>
                     <template slot="hover-element">
-                        <button class="add addMOC" v-if="record.data.moc_access_url" v-on:click="$root.$emit('addCoverage', record.data)">
+                        <button class="add addMOC" v-if="record.data && record.data.moc_access_url" v-on:click="$root.addCoverage(record.data)">
                             <i class="fas fa-map-marked-alt"></i>
                         </button>
                     </template>
@@ -98,7 +98,7 @@
 
                 <TooltipComponent>
                     <template slot="hover-element">
-                        <button class="add addMOC" v-if="record.data.moc_access_url" v-on:click="$root.$emit('addCoverage', record.data)">
+                        <button class="add addMOC" v-if="record.data && record.data.moc_access_url" v-on:click="$root.addCoverage(record.data)">
                             <i class="fas fa-map-marked-alt"></i>
                         </button>
                     </template>
@@ -189,7 +189,6 @@ class Record {
 
             this.bib_reference = this.data.bib_reference;
 
-            console.log('GET RECORD:', data);
             if (this.isImageType()) {
                 this.previewURL = this.data.hips_service_url + '/preview.jpg';
             } else if (this.isVizierCatalog()) {
@@ -200,7 +199,6 @@ class Record {
                 /* Vizier cat */
 
             }
-            console.log('preview URL: ', this.previewURL);
         }
     }
 
@@ -216,7 +214,6 @@ class Record {
         return RetrieveRecordCollectionQuery.getUrl(this.id, 'html');
     }
 }
-
 @Component({
     name: 'popup-component',
     components: {
@@ -234,15 +231,12 @@ export default class PopupComponent extends Vue {
 
     @Watch('collection')
     public showPopup(collection: HeaderSelectionEvent, oldCollection: HeaderSelectionEvent) {
-        console.log('show popup', collection);
         if (collection) {
             RetrieveRecordCollectionQuery.send(this, collection.header.ID);
         }
     }
 
     public mounted() {
-        console.log('Popup component MOUNTED');
-
         this.$root.$on('retrieveRecordCollection', (response: any[]) => {
             const data = response[0];
             this.record = new Record(data);
@@ -254,10 +248,12 @@ export default class PopupComponent extends Vue {
         const isImage = this.record.isImageType();
 
         if (isImage) {
-            this.$root.$emit('addImage', this.record.data);
+            // this.$root.$emit('addImage', this.record.data);
+            this.$root.addImage(this.record.data);
         } else {
             // Vizier Catalog
-            this.$root.$emit('addCatalog', this.record.data, this.viewport.getCenter(), this.viewport.getRadius());
+            // this.$root.$emit('addCatalog', this.record.data, this.viewport.getCenter(), this.viewport.getRadius());
+            this.$root.addCatalog(this.record.data, this.viewport.getCenter(), this.viewport.getRadius());
         }
     }
 }

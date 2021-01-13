@@ -33,17 +33,14 @@ export default class PaginationComponent extends Vue {
     private maxNumPage: number = 1;
 
     public mounted() {
-        console.log('Pagination component MOUNTED');
         this.updatePagination();
     }
     @Watch('numCollections')
     private onChangedCollections(val: number, oldVal: number) {
-        console.log('on changed collections');
         this.computeMaxNumPage();
     }
     @Watch('numCollectionsPerPage')
     private onChangedNumCollectionsPerPage(val: number, oldVal: number) {
-        console.log('on changed num collections');
         this.computeMaxNumPage();
     }
 
@@ -51,7 +48,6 @@ export default class PaginationComponent extends Vue {
         const d = this.numCollections / this.numCollectionsPerPage;
         const t = Math.floor(d);
         this.maxNumPage = d == t ? Math.max(t, 1) : t + 1;
-        console.log('max number of pages', this.maxNumPage, this.numCollections);
         if (this.currentPage >= this.maxNumPage) {
             this.currentPage = this.maxNumPage - 1;
         }
@@ -78,7 +74,6 @@ export default class PaginationComponent extends Vue {
             (this.currentPage + 1) * this.numCollectionsPerPage,
         ];
 
-        console.log('update pagination', sliceBounds);
         this.$emit('pagination',
             sliceBounds,
         );

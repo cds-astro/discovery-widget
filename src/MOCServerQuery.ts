@@ -14,34 +14,30 @@ abstract class MOCServer {
             // Register the time when the query is sent to the MOCServer
             MOCServer.lastFilterEventUrl = url;
         }
-        console.log(url);
         /* Say to the caller component that a http request to the MOCServer is launched */
         if (loading) {
             caller.setLoading(true);
         }
 
-        let promise = new Promise((resolve, reject) => {
+        const promise = new Promise((resolve, reject) => {
             const xhr = new XMLHttpRequest();
-            xhr.open("GET", url);
+            xhr.open('GET', url, true);
             xhr.onload = () => resolve(xhr.responseText);
             xhr.onerror = () => reject(xhr.statusText);
             xhr.send();
         });
 
         promise.then((result) => {
-            console.log('EVENT: ', event);
             // Check whether the last url sent corresponds to this one
             if (event !== 'filterTree') {
                 MOCServer.callback(result as string, caller, event, loading);
             } else {
                 // If a filter tree event has been launched
-                // then lastFilterEventUrl is defined 
+                // then lastFilterEventUrl is defined
                 if (url === MOCServer.lastFilterEventUrl) {
                     MOCServer.callback(result as string, caller, event, loading);
                 }
             }
-        }).catch(function(val) {
-            console.log(val)
         });
     }
 
@@ -72,7 +68,7 @@ function firstLetterToUppercase(word: string): string {
 }
 
 export function createDatasetName(dataset: HeaderResponse): {dataset: string, catalog: string} {
-    let name = {
+    const name = {
         dataset: '',
         catalog: '',
     };
@@ -83,7 +79,7 @@ export function createDatasetName(dataset: HeaderResponse): {dataset: string, ca
         name.catalog = 'Simbad';
         return name;
     }
-    
+
     const hasClientCategory = !isNullOrUndefined(dataset.client_category);
 
     if (!hasClientCategory) {
@@ -96,7 +92,7 @@ export function createDatasetName(dataset: HeaderResponse): {dataset: string, ca
         name.catalog = name.dataset.substr(0, end);
     } else {
         name.catalog = dataset.client_category;
-        let firstWord = name.catalog.split('/')[0];
+        const firstWord = name.catalog.split('/')[0];
         if (firstWord !== 'Image' && firstWord !== 'Catalog') {
             let dataproduct_type = dataset.dataproduct_type;
             if (isNullOrUndefined(dataproduct_type)) {
@@ -114,7 +110,7 @@ export function createDatasetName(dataset: HeaderResponse): {dataset: string, ca
     name.dataset = name.dataset.replace('/P/', '/Others/');
 
     return name;
-} 
+}
 
 export class TreeViewportMOCServerQuery extends MOCServer {
     public static getUrl(vp: Viewport): string {
@@ -135,7 +131,7 @@ export class TreeViewportMOCServerQuery extends MOCServer {
 }
 
 export class TreeFilterMOCServerQuery extends MOCServer {
-    public static getUrl(filter: Map<string, Array<Tag>>, exclusion: boolean): string {
+    public static getUrl(filter: Map<string, Tag[]>, exclusion: boolean): string {
 
         let url = MOCServer.URL +
         'get=record&' +
@@ -147,26 +143,26 @@ export class TreeFilterMOCServerQuery extends MOCServer {
             return url;
         }
 
-        url += '&expr='
+        url += '&expr=';
         let i = 0;
-        for (let [key, tags] of filter.entries()) {
+        for (const [key, tags] of filter.entries()) {
             const operator = tags[0].operator;
-            let values = [];
-            tags.forEach(tag => {
+            const values = [];
+            tags.forEach((tag) => {
                 values.push(tag.value);
             });
-            let value = values.join(',');
+            const value = values.join(',');
 
-            if(i > 0) {
+            if (i > 0) {
                 url += encodeURIComponent('&&');
             }
-            if(key === "keywords") {
+            if (key === 'keywords') {
                 const kws = value.split(' ');
-                for(let j = 0; j < kws.length; j++) {
-                    let kw = kws[j];
-                    let kw_url = encodeURIComponent('(obs_title=*' + kw + '*||obs_id=*' + kw + '*||obs_collection=*' + kw + '*||bib_reference=*' + kw + '*)');
+                for (let j = 0; j < kws.length; j++) {
+                    const kw = kws[j];
+                    const kw_url = encodeURIComponent('(obs_title=*' + kw + '*||obs_id=*' + kw + '*||obs_collection=*' + kw + '*||bib_reference=*' + kw + '*)');
 
-                    if(j == 0) {
+                    if (j == 0) {
                         url += kw_url;
                     } else {
                         url += encodeURIComponent('&&') + kw_url;
@@ -184,12 +180,10 @@ export class TreeFilterMOCServerQuery extends MOCServer {
             i++;
         }
 
-        console.log('FITLER URL', url);
-
         return url;
     }
 
-    public static send(caller: any, filter: Map<string, Array<Tag>>, excludePlausibleCollection: boolean = false): void {
+    public static send(caller: any, filter: Map<string, Tag[]>, excludePlausibleCollection: boolean = false): void {
         const url = this.getUrl(filter, excludePlausibleCollection);
         MOCServer.query(url, caller, 'filterTree');
     }

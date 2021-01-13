@@ -37,33 +37,20 @@ import { isNullOrUndefined, isNull } from 'util';
     },
 })
 export default class SearchComponent extends Vue {
-    private search: string = "";
-    /*
-    @Prop() deletedTag!: string;
-    @Watch('deletedTag')
-    public deleteTag(key: string, oldKey: string) {
-        console.log('delete search tag', key);
-        if (key === "keywords") {
-            this.search = "";
-        }
-    }*/
 
-    @Prop() updatedTagsFromWidget!: Map<string, Array<Tag>>;
+    @Prop() public updatedTagsFromWidget!: Map<string, Tag[]>;
+    private search: string = '';
     @Watch('updatedTagsFromWidget')
-    public changeTagsFromWidget(newTags: Map<string, Array<Tag>>, oldTags: Map<string, Array<Tag>>) {
-        const tags = newTags.get("keywords");
-        if(isNullOrUndefined(tags)) {
-            this.search = "";
+    public changeTagsFromWidget(newTags: Map<string, Tag[]>, oldTags: Map<string, Tag[]>) {
+        const tags = newTags.get('keywords');
+        if (isNullOrUndefined(tags)) {
+            this.search = '';
         }
-    }
-
-    public mounted() {
-        console.log('Search component MOUNTED');
     }
 
     public addKeywordsTag(input: string) {
         if (input) {
-            let tag = new Tag('=', input, input);
+            const tag = new Tag('=', input, input);
             this.$emit('updateFilterTags', {
                 key: 'keywords',
                 tags: [tag],

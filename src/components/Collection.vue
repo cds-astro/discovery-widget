@@ -59,7 +59,6 @@ export default class CollectionComponent extends Vue {
     }
 
     public mounted() {
-        console.log('Collection component MOUNTED');
         this.update(this.catalog);
     }
 

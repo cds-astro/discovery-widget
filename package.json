@@ -1,7 +1,7 @@
 {
-  "name": "collection-tree",
-  "version": "0.1.0",
-  "homepage": "./moctree/",
+  "name": "discovery-tree",
+  "version": "1.0.0",
+  "homepage": "./discovery-tree/",
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",

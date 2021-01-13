@@ -97,12 +97,6 @@ export type HeaderDatasetType = HeaderResponse & {inViewport: boolean, filtered:
 type CatalogueType = HeaderDatasetType[];
 
 export class Tree {
-    public children: Tree[];
-    public parent: Tree;
-    public ID: string;
-    
-    /* Hardcoded labels */
-    public label: string;
     private static labels: Map<string, string> = new Map<string, string>([
         ['B', 'Copies of external databases, regularly updated'],
         ['I', 'Astrometric Data'],
@@ -130,6 +124,12 @@ export class Tree {
         ['PASP', 'Publications of the Astronomical Society of the Pacific'],
         ['PAZh', 'Pis\'ma v Astronomicheskii Zhurnal (Astronomy Letters)'],
     ]);
+    public children: Tree[];
+    public parent: Tree;
+    public ID: string;
+
+    /* Hardcoded labels */
+    public label: string;
 
     public catalogs: Map<ID, Map<ID, HeaderDatasetType>>;
 
@@ -138,7 +138,7 @@ export class Tree {
     public numberOfCatalogs: number;
     public inViewport: boolean;
 
-    constructor(ID: string, parent: Tree, label: string = "") {
+    constructor(ID: string, parent: Tree, label: string = '') {
         this.children = [];
         this.ID = ID;
         this.catalogs = new Map<ID, Map<ID, HeaderDatasetType>>();
@@ -152,8 +152,8 @@ export class Tree {
 
     public getPath(): String[] {
         let currentNode = this;
-        let path = [];
-        while(!isNullOrUndefined(currentNode)) {
+        const path = [];
+        while (!isNullOrUndefined(currentNode)) {
             path.push(currentNode.ID);
             let nextNode = null;
             nextNode = currentNode.parent;
@@ -164,12 +164,11 @@ export class Tree {
 
     public findNode(path: String[]): Tree {
         let currentNode = this;
-        console.log('FIND NODE: ', path);
-        while(path.length > 1) {
+        while (path.length > 1) {
             path = path.slice(1);
             let nextNode = null;
             for (let i = 0; i < currentNode.children.length; ++i) {
-                let child = currentNode.children[i];
+                const child = currentNode.children[i];
                 if (child.ID === path[0]) {
                     nextNode = child;
                     break;
@@ -185,10 +184,10 @@ export class Tree {
     }
 
     public filter(tables: HeaderResponse[], tableToNode: Map<string, Tree>, tableToCat: Map<string, string>) {
-        this.resetFiltering(); 
-        tables.forEach(table => {
+        this.resetFiltering();
+        tables.forEach((table) => {
 
-                let name = createDatasetName(table);
+                const name = createDatasetName(table);
                 const node = tableToNode.get(name.dataset);
                 const catID = tableToCat.get(name.dataset);
 
@@ -196,8 +195,8 @@ export class Tree {
                     const cat = node.catalogs.get(catID);
                     if (!isNullOrUndefined(cat)) {
                     const tableToShow = cat.get(name.dataset);
-                        if (!isNullOrUndefined(tableToShow)) {
-                            tableToShow.filtered = true; 
+                    if (!isNullOrUndefined(tableToShow)) {
+                            tableToShow.filtered = true;
                             const id = node.catalogsList.indexOf(cat);
                             node.catalogsToShow[id] = true;
                         }
@@ -230,17 +229,17 @@ export class Tree {
     public viewport(tables: HeaderResponse[], tableToNode: Map<string, Tree>, tableToCat: Map<string, string>) {
         this.resetViewport();
 
-        tables.forEach(table => {
+        tables.forEach((table) => {
             // Retrieve the catalogue with respect to the table
-            let name = createDatasetName(table);
+            const name = createDatasetName(table);
 
             const node = tableToNode.get(name.dataset);
             const catID = tableToCat.get(name.dataset);
             if (!isNullOrUndefined(node) && !isNullOrUndefined(catID)) {
                const cat = node.catalogs.get(catID);
-                if (!isNullOrUndefined(cat)) {
+               if (!isNullOrUndefined(cat)) {
                    const tableInViewport = cat.get(name.dataset);
-                    if (tableInViewport) {
+                   if (tableInViewport) {
                         tableInViewport.inViewport = true;
                     }
                 }
@@ -254,7 +253,7 @@ export class Tree {
     }
 
     public numberCatalogs(): number {
-        let numberOfCatalogs = 0; 
+        let numberOfCatalogs = 0;
         if (!this.isLeaf()) {
             for (let i = 0; i < this.children.length; ++i) {
                 const child = this.children[i];
@@ -272,7 +271,7 @@ export class Tree {
 
         for (let i = 0; i < this.catalogsList.length; i++) {
             const catalog = this.catalogsList[i];
-            for (let table of catalog.values()) {
+            for (const table of catalog.values()) {
                 if (table.filtered && table.inViewport) {
                     inViewport = true;
                     break;
@@ -342,15 +341,15 @@ export class Tree {
                     cat.set(datasetName, dataset);
                 }
             }
-            
+
             tableToNode.set(datasetName, this);
         }
     }
 
     public IdLesserThan(id1: string, id2: string) {
-        let a = id1.match(/\d/g);
-        let b = id2.match(/\d/g);
-        
+        const a = id1.match(/\d/g);
+        const b = id2.match(/\d/g);
+
         if (isNullOrUndefined(a) && !isNullOrUndefined(b)) {
             return true;
         } else if (!isNullOrUndefined(a) && isNullOrUndefined(b)) {
@@ -359,30 +358,30 @@ export class Tree {
             return id1 < id2;
         }
 
-        let n1 = +(a.join(""));
-        let n2 = +(b.join(""));
+        const n1 = +(a.join(''));
+        const n2 = +(b.join(''));
 
         return n1 < n2;
     }
 
     public mergeSort(input: Tree[]): Tree[] {
-        if(input.length == 1) {
+        if (input.length == 1) {
             return input;
-        } 
+        }
 
         const middleIndex = Math.floor(input.length / 2);
 
-        let tab1 = this.mergeSort(input.slice(0, middleIndex));
-        let tab2 = this.mergeSort(input.slice(middleIndex));
+        const tab1 = this.mergeSort(input.slice(0, middleIndex));
+        const tab2 = this.mergeSort(input.slice(middleIndex));
 
-        let result = [];
+        const result = [];
         let id1 = 0;
         let id2 = 0;
         while (result.length < input.length) {
             if (id1 == tab1.length) {
                 result.push(tab2[id2]);
                 id2 += 1;
-            } else if(id2 == tab2.length) {
+            } else if (id2 == tab2.length) {
                 result.push(tab1[id1]);
                 id1 += 1;
             } else {
@@ -400,7 +399,7 @@ export class Tree {
     }
 
     public sort() {
-        let children = this.children;
+        const children = this.children;
         if (children.length == 0) {
             return;
         }
@@ -409,7 +408,7 @@ export class Tree {
         this.children = sortedChildren;
 
         for (let i = 0; i < this.children.length; ++i) {
-            let child = this.children[i];
+            const child = this.children[i];
             child.sort();
         }
     }
@@ -417,11 +416,11 @@ export class Tree {
     private resetFiltering() {
         for (let i = 0; i < this.catalogsList.length; ++i) {
            const catalog = this.catalogsList[i];
-            for(let table of catalog.values()) {
+           for (const table of catalog.values()) {
                 table.filtered = false;
             }
 
-            this.catalogsToShow[i] = false;
+           this.catalogsToShow[i] = false;
         }
 
         for (let i = 0; i < this.children.length; ++i) {
@@ -433,7 +432,7 @@ export class Tree {
     private resetViewport() {
         for (let i = 0; i < this.catalogsList.length; ++i) {
            const catalog = this.catalogsList[i];
-            for(let table of catalog.values()) {
+           for (const table of catalog.values()) {
                 table.inViewport = false;
             }
         }
@@ -446,8 +445,8 @@ export class Tree {
 
     private numOfTables(): number {
         let numberOfTables = 0;
-        this.catalogsList.forEach(cat => {
-            for(let table of cat.values()) {
+        this.catalogsList.forEach((cat) => {
+            for (const table of cat.values()) {
                 if (table.filtered) {
                     numberOfTables++;
                 }
@@ -459,7 +458,7 @@ export class Tree {
     private getChild(ID: string): Tree {
         let result = null;
 
-        this.children.forEach(child => {
+        this.children.forEach((child) => {
             if (child.ID === ID) {
                 result = child;
             }
@@ -485,8 +484,8 @@ export default class WidgetComponent extends Vue {
     /* To be aligned with the icon */
     @Prop()public  offsetTop!: number;
     private needToUpdateMenu: boolean = true;
-    private lastTimePositionChanged: number = (new Date()).getTime(); 
-    private header : Map<ID, HeaderDatasetType> = new Map<ID, HeaderDatasetType>();
+    private lastTimePositionChanged: number = (new Date()).getTime();
+    private header: Map<ID, HeaderDatasetType> = new Map<ID, HeaderDatasetType>();
     private catalogues: Map<ID, Map<ID, HeaderDatasetType>> = new Map<ID, Map<ID, HeaderDatasetType>>();
     private tableToCat: Map<string, string> = new Map<string, string>();
     private tableToNode: Map<string, Tree> = new Map<string, Tree>();
@@ -500,11 +499,11 @@ export default class WidgetComponent extends Vue {
     // Used for debug purposes
     private log: string = '';
 
-    private viewport : Viewport = new Viewport();
+    private viewport: Viewport = new Viewport();
 
     private numPrintedCollections: number = 0;
 
-    private sliceBounds: number[] = [] 
+    private sliceBounds: number[] = [];
 
     private init: boolean = true;
 
@@ -524,9 +523,9 @@ export default class WidgetComponent extends Vue {
     private scrollY: number = 0;
 
     /* Filter tags */
-    private tags: Map<string, Array<Tag>> = new Map<string, Array<Tag>>();
-    private tagsList: Array<Tag> = [];
-    private sendTagsToFilter: Map<string, Array<Tag>> = this.tags;
+    private tags: Map<string, Tag[]> = new Map<string, Tag[]>();
+    private tagsList: Tag[] = [];
+    private sendTagsToFilter: Map<string, Tag[]> = this.tags;
 
     /* Loading flag enabled when a HTTP request has been sent to the MOCServer, not received and not processed */
     private isLoading: boolean = false;
@@ -535,7 +534,6 @@ export default class WidgetComponent extends Vue {
     private excludePlausibleCollection: boolean = true;
 
     public mounted() {
-        console.log('Tree component MOUNTED'); 
         this.$root.$on('updateViewer', (args: any[]) => {
             const corners = args[0];
             const center = args[1];
@@ -550,11 +548,9 @@ export default class WidgetComponent extends Vue {
             this.needToUpdateMenu = true;
 
             this.lastTimePositionChanged = (new Date()).getTime();
-            console.log('view changed', this.viewport.toString());
         });
 
         this.$root.$on('viewportTree', (tablesInViewport: HeaderResponse[]) => {
-            console.log('Viewport tree triggered!');
             /* Shallow copy of root: the objects within root are copied as references */
             const filteredRoot = new Tree(this.root.ID, this.root.parent);
             filteredRoot.children = this.root.children;
@@ -570,7 +566,6 @@ export default class WidgetComponent extends Vue {
         });
 
         this.$root.$on('filterTree', (tables: HeaderResponse[]) => {
-            console.log('Filter tree triggered!');
 
             /* Shallow copy of root: the objects within root are copied as references */
             /*
@@ -580,13 +575,11 @@ export default class WidgetComponent extends Vue {
             filteredRoot.catalogsList = this.root.catalogsList;
             filteredRoot.catalogsToShow = this.root.catalogsToShow;
 */
-            console.log('AA');
             this.root.filter(tables, this.tableToNode, this.tableToCat);
             this.root.checkInViewport();
-            console.log('TT');
 
             /* Update root so that it will be propagates through the tree component */
-            //this.root = filteredRoot;
+            // this.root = filteredRoot;
 
             /* Move to root if there are no table in the current node */
             if (this.currentNode.needToMoveToRoot()) {
@@ -599,9 +592,9 @@ export default class WidgetComponent extends Vue {
         });
 
         this.$root.$on('retrieveAllDatasetHeaders', (tables: HeaderResponse[]) => {
-            tables.forEach(table => {
+            tables.forEach((table) => {
                 /* Constructs the catalogues here */
-                let dataset: HeaderDatasetType = {
+                const dataset: HeaderDatasetType = {
                     ID: table.ID,
                     obs_id: table.obs_id,
                     obs_title: table.obs_title,
@@ -612,11 +605,11 @@ export default class WidgetComponent extends Vue {
                     vizier_popularity: table.vizier_popularity,
                 };
 
-                let name = createDatasetName(dataset);
+                const name = createDatasetName(dataset);
                 /* Construct the tree by adding its client category */
                 // Client category gives the tree path. Otherwise (e.g. for vizier tables), one can
                 // construct the path directly by looking its ID.
-                
+
                 this.root.addTable(name.dataset.split('/'), name.catalog, name.dataset, dataset, this.tableToNode);
                 /* Update tableToCat and headers*/
                 /*
@@ -629,17 +622,13 @@ export default class WidgetComponent extends Vue {
                 this.tableToCat.set(name.dataset, name.catalog);
             });
 
-            console.log('SORT BEGIN');
             this.root.sort();
-            console.log('SORT END');
 
             // Compute the number of catalogs
             this.numAllDatasets = this.root.numberCatalogs();
-            console.log('The TREE', this.root);
 
             // Num of catalogues
             this.numPrintedCollections = this.catalogues.size;
-            console.log('CATALOGUES: ', this.catalogues);
         });
 
         // Query the MOCServer for retrieving all the dataset headers
@@ -652,7 +641,7 @@ export default class WidgetComponent extends Vue {
             changed over a quite long period of time. Say 500ms.*/
             if (this.needToUpdateMenu) {
                const currentTime = (new Date()).getTime();
-                if (currentTime - this.lastTimePositionChanged > 500) {
+               if (currentTime - this.lastTimePositionChanged > 1000) {
                     this.needToUpdateMenu = false;
 
                     const viewport = this.viewport;
@@ -663,12 +652,20 @@ export default class WidgetComponent extends Vue {
         }, 100);
     }
 
+    public setLoading(isLoading: boolean) {
+        this.isLoading = isLoading;
+    }
+
+    public setExcludePlausibleCollections(excludePlausibleCollection: boolean) {
+        this.excludePlausibleCollection = excludePlausibleCollection;
+        this.queryMOCServerOnFilter();
+    }
+
     private queryMOCServerOnFilter(): void {
         TreeFilterMOCServerQuery.send(this, this.tags, this.excludePlausibleCollection);
     }
 
     private sliceHeaders(args: any) {
-        console.log('page changed', args);
         // The page has changed, we reset the selection of collections
         this.selectPopup = false;
         this.showPopup = false;
@@ -680,11 +677,11 @@ export default class WidgetComponent extends Vue {
     private updateShowHeaders() {
         this.cataloguesList = this.cataloguesToShow.slice(
             this.sliceBounds[0],
-            this.sliceBounds[1]
+            this.sliceBounds[1],
         );
     }
 
-    private updateTags(key: string, tags: Array<Tag>) {
+    private updateTags(key: string, tags: Tag[]) {
         if (tags.length == 0) {
             this.tags.delete(key);
         } else {
@@ -693,29 +690,28 @@ export default class WidgetComponent extends Vue {
 
         // Update the list of tags to show
         this.tagsList = [];
-        Array.from(this.tags.values()).forEach(t => {
+        Array.from(this.tags.values()).forEach((t) => {
             this.tagsList = this.tagsList.concat(t);
         });
-        console.log('updated tags', this.tags, this.tagsList);
         this.queryMOCServerOnFilter();
     }
 
     private removeTag(tagToRemove: Tag) {
-        //let nextTagSet = new Map<string, Array<Tag>>(this.tags);
+        // let nextTagSet = new Map<string, Array<Tag>>(this.tags);
         let tagArrayCandidate = [];
-        let keyCandidate
+        let keyCandidate;
         let id = -1;
-        for (let [key, tags] of this.tags.entries()) {
+        for (const [key, tags] of this.tags.entries()) {
             id = tags.indexOf(tagToRemove);
             if (id > -1) {
                 tagArrayCandidate = tags;
                 keyCandidate = key;
-                //this.deletedTag = ;
+                // this.deletedTag = ;
                 /*this.$nextTick(() => (this.deletedTag = ''));*/
                 break;
             }
         }
-        
+
         tagArrayCandidate.splice(id, 1);
         if (tagArrayCandidate.length == 0) {
             this.tags.delete(keyCandidate);
@@ -724,22 +720,12 @@ export default class WidgetComponent extends Vue {
         }
         // Update the list of tags to show
         this.tagsList = [];
-        Array.from(this.tags.values()).forEach(t => {
+        Array.from(this.tags.values()).forEach((t) => {
             this.tagsList = this.tagsList.concat(t);
         });
-        console.log('updated tags', this.tags, this.tagsList);
-        
-        this.sendTagsToFilter = new Map<string, Array<Tag>>(this.tags);
 
-        this.queryMOCServerOnFilter();
-    }
+        this.sendTagsToFilter = new Map<string, Tag[]>(this.tags);
 
-    public setLoading(isLoading: boolean) {
-        this.isLoading = isLoading;
-    }
-
-    public setExcludePlausibleCollections(excludePlausibleCollection: boolean) {
-        this.excludePlausibleCollection = excludePlausibleCollection;
         this.queryMOCServerOnFilter();
     }
 }

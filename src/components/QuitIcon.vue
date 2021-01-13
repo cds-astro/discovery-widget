@@ -13,9 +13,6 @@ import { Vue, Prop, Component, Watch } from 'vue-property-decorator';
     name: 'quit',
 })
 export default class QuitComponent extends Vue {
-    public mounted() {
-        console.log('Quit component MOUNTED');
-    }
 }
 </script>
 

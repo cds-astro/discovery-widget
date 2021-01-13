@@ -16,12 +16,8 @@ import { Vue, Prop, Component, Watch } from 'vue-property-decorator';
     name: 'tooltip',
 })
 export default class TooltipComponent extends Vue {
-    @Prop() width!: number;
-    @Prop() height!: number;
-
-    public mounted() {
-        console.log('Tooltip component MOUNTED');
-    }
+    @Prop() public width!: number;
+    @Prop() public height!: number;
 }
 </script>
 

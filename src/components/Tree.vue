@@ -89,10 +89,6 @@ export default class TreeComponent extends Vue {
     @Prop() public viewport!: Viewport;
 
     @Prop() public scrollPositionY!: number;
-    @Watch('scrollPositionY')
-    public changeScrollPositionY(scrollY: number, prevScrollY: number) {
-        this.scrollAlongTree(scrollY);
-    }
 
     private root: Tree = null;
 
@@ -106,18 +102,13 @@ export default class TreeComponent extends Vue {
     private popupOutOfBounds: boolean = false;
 
     private collectionToShowHeight: number = 0;
+    @Watch('scrollPositionY')
+    public changeScrollPositionY(scrollY: number, prevScrollY: number) {
+        this.scrollAlongTree(scrollY);
+    }
 
     @Watch('tree')
     public changeTree(newTree: Tree, oldRoot: Tree) {
-        // Find the node where the user is so that the tree does not cd to its root
-        /*
-        const path = this.root.getPath();
-        console.log('PATH ROOT', path);
-        const newRoot = newTree.findNode(path);
-        if (!isNullOrUndefined(newRoot)) {
-            this.root = newRoot;
-            this.$forceUpdate();
-        }*/
         this.root = newTree;
     }
 
@@ -129,7 +120,6 @@ export default class TreeComponent extends Vue {
     }
 
     public mounted() {
-        console.log('Tree component MOUNTED');
         this.root = this.tree;
 
         // Managing collection popup deselection.
@@ -141,7 +131,7 @@ export default class TreeComponent extends Vue {
     private clickOnTable(event: any): boolean {
         let currentElement = event.target;
         while (!isNullOrUndefined(currentElement)) {
-            const liElement = currentElement.classList[0]; 
+            const liElement = currentElement.classList[0];
             if (!isNullOrUndefined(liElement) && liElement.indexOf('table-component') !== -1) {
                 return true;
             }
@@ -176,7 +166,6 @@ export default class TreeComponent extends Vue {
     }
 
     private hidePopup() {
-        console.log('HIDE')
         this.selectPopup = false;
         this.showPopup = false;
 
@@ -196,19 +185,17 @@ export default class TreeComponent extends Vue {
 
         this.collectionToShow = this.hoveredCollection;
         this.collectionToShowHeight = this.collectionToShow.element.offsetHeight;
-        
-        let scrollableElement = this.$el.parentElement;
-        let widgetElement = scrollableElement.parentElement;
+
+        const scrollableElement = this.$el.parentElement;
+        const widgetElement = scrollableElement.parentElement;
         this.positionPopup = this.collectionToShow.offsetTop - widgetElement.offsetTop;
 
         this.collectionToShow.element.style.backgroundColor = 'lightgray';
         this.scrollTop = this.scrollPositionY;
 
-        console.log('CLICK:', this.collectionToShow);
     }
 
     private hoverCollection(event: any) {
-        console.log('HOVER:', event);
         this.hoveredCollection = event;
         // If there is no collection selected we show the popup of the collection
         // located under the mouse pointer.
@@ -218,8 +205,8 @@ export default class TreeComponent extends Vue {
 
             this.showPopup = true;
 
-            let scrollableElement = this.$el.parentElement;
-            let widgetElement = scrollableElement.parentElement;
+            const scrollableElement = this.$el.parentElement;
+            const widgetElement = scrollableElement.parentElement;
             this.positionPopup = this.collectionToShow.offsetTop - widgetElement.offsetTop;
         }
     }
@@ -228,23 +215,22 @@ export default class TreeComponent extends Vue {
         // Apply only when no collection is selected
         if (!this.selectPopup) {
             this.showPopup = false;
-            console.log('leave');
         }
     }
 
     private scrollAlongTree(scrollTopPosition: number) {
         // Update the position of the selected collection if there is any.
         if (this.selectPopup) {
-            let scrollableElement = this.$el.parentElement;
-            let widgetElement = scrollableElement.parentElement;
+            const scrollableElement = this.$el.parentElement;
+            const widgetElement = scrollableElement.parentElement;
 
             const deltaScroll = scrollTopPosition - this.scrollTop;
             this.positionPopup = this.collectionToShow.offsetTop - widgetElement.offsetTop - deltaScroll;
-        
+
             // Check whether the selection is out of the scrolling window.
             // If so, disable the plot of the popup
             this.popupOutOfBounds = false;
-            
+
             const topWidget = scrollableElement.offsetTop;
             const bottomWidget = scrollableElement.offsetTop + scrollableElement.offsetHeight;
 
