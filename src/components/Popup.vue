@@ -7,7 +7,7 @@
             <div id="header">
                 <div id="figure">
                     <img v-if="record.isVizierCatalog()" v-bind:src="record.previewURL" alt="preview">
-                    <img v-else v-bind:style="{ height: '125px' }" v-bind:src="record.previewURL" alt="preview">
+                    <img v-else v-bind:src="record.previewURL" alt="preview">
 
                     <figcaption><p>{{ record.id }}</p></figcaption>
                 </div>
@@ -37,7 +37,7 @@
 
                             <template slot="content">
                                 <i class="ads"></i>
-                                <p>Bibcode assigned by the ADS</p>
+                                <p>Link to ADS</p>
                             </template>
                         </TooltipComponent>
                     </div>
@@ -50,7 +50,7 @@
                 <TooltipComponent>
                     <template slot="hover-element">
                         <button class="add addImageHiPS" v-on:click="addCollection()">
-                            <i class="fas fa-plus"></i>
+                            <i class="fa fa-plus"></i>
                         </button>
                     </template>
 
@@ -62,7 +62,11 @@
                 <TooltipComponent>
                     <template slot="hover-element">
                         <button class="add addMOC" v-if="record.data && record.data.moc_access_url" v-on:click="$root.addCoverage(record.data)">
-                            <i class="fas fa-map-marked-alt"></i>
+                            <i class="icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+                                </svg>
+                            </i>
                         </button>
                     </template>
 
@@ -74,7 +78,7 @@
                 <TooltipComponent>
                     <template slot="hover-element">
                         <form :action="record.propertiesFileUrl()" method="post" target="_blank">
-                            <button class="info"><i class="fas fa-file"></i></button>
+                            <button class="info"><i class="fa fa-file"></i></button>
                         </form>
                     </template>
 
@@ -87,7 +91,7 @@
                 <TooltipComponent>
                     <template slot="hover-element">
                         <button class="add addCatalog" v-on:click="addCollection()">
-                            <i class="fas fa-plus"></i>
+                            <i class="fa fa-plus"></i>
                         </button>
                     </template>
 
@@ -99,7 +103,11 @@
                 <TooltipComponent>
                     <template slot="hover-element">
                         <button class="add addMOC" v-if="record.data && record.data.moc_access_url" v-on:click="$root.addCoverage(record.data)">
-                            <i class="fas fa-map-marked-alt"></i>
+                            <i class="icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+                                </svg>
+                            </i>
                         </button>
                     </template>
 
@@ -123,7 +131,7 @@
                 <TooltipComponent>
                     <template slot="hover-element">
                         <form :action="record.propertiesFileUrl()" method="post" target="_blank">
-                            <button class="info"><i class="fas fa-file"></i></button>
+                            <button class="info"><i class="fa fa-file"></i></button>
                         </form>
                     </template>
 
@@ -249,17 +257,19 @@ export default class PopupComponent extends Vue {
 
         if (isImage) {
             // this.$root.$emit('addImage', this.record.data);
-            this.$root.addImage(this.record.data);
+            this.$root['addImage'](this.record.data);
         } else {
             // Vizier Catalog
             // this.$root.$emit('addCatalog', this.record.data, this.viewport.getCenter(), this.viewport.getRadius());
-            this.$root.addCatalog(this.record.data, this.viewport.getCenter(), this.viewport.getRadius());
+            this.$root['addCatalog'](this.record.data, this.viewport.getCenter(), this.viewport.getRadius());
         }
     }
 }
 </script>
 
 <style lang="scss">
+
+@import './../css/icon.css';
 
 $space: 5px;
 $width-img: 125px;
@@ -276,7 +286,6 @@ $size-tail: 10px;
     width: 180%;
 
     border-radius: 2px;
-    border: 1px solid gray;
 
     padding: $space;
 
@@ -304,10 +313,10 @@ $size-tail: 10px;
                 }
 
                 img:before {
-                    background-image: url("./../../images/thumbnail.jpeg");
-                    background-repeat: no-repeat;
-                    background-position: center;
-                    background-size: $width-img $width-img;
+                    //background-image: url("./../../images/thumbnail.jpeg");
+                    //background-repeat: no-repeat;
+                    //background-position: center;
+                    //background-size: $width-img $width-img;
 
                     width: 100%;
                     height: 100%;
@@ -333,6 +342,9 @@ $size-tail: 10px;
                     top: 50%;
                     left: 50%;
                     transform: translate(-50%, -50%);
+                    width: 100%;
+                    height: 100%;
+                    text-align: center;
                 }
                 
                 figcaption p {
@@ -363,19 +375,14 @@ $size-tail: 10px;
 
             #title {
                 margin: 0px 10px;
-                padding: 10px 5px;
-                border-bottom: 3px solid gray;
+                padding: 0px 5px;
+                
                 text-align: center;
 
                 #bibcode {
-                    font-size: 15px;
                     text-align: right;
-                    i {
-                        display: inline-block;
-                        font-size: 22px;
-                        vertical-align: middle;
-                        margin-right: 3px;
-                    }
+                    padding: 0px;
+                    margin: 0px;
 
                     a {
                         color: #3498db;
@@ -397,7 +404,7 @@ $size-tail: 10px;
                     }
 
                     p {
-                                            display: inline-block;
+                        display: inline-block;
                         vertical-align: middle;
                     }
                 }
@@ -447,12 +454,10 @@ $size-tail: 10px;
                     color: white;
                     
                     border-radius: 4px;
-                    width: 36px;
-                    height: 36px;
-                    font-size: 22px;
+                    width: 32px;
+                    height: 32px;
                     
                     display: inline-block;
-                    
                     vertical-align: middle;
 
                     margin-right: 5px;
@@ -478,13 +483,6 @@ $size-tail: 10px;
                         &:hover {
                             background-color: #A3E40D;
                         }
-                    }
-
-                    i {
-                        position: absolute;
-                        top: 50%;
-                        left: 50%;
-                        transform: translate(-50%, -50%);
                     }
 
                     cursor: pointer;

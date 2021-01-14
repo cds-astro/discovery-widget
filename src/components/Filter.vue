@@ -3,8 +3,8 @@
 <template>
     <div id="filter">
         <div id="shower">
-            <div @click="showForm = !showForm" id="icon">
-                <i class="fas fa-filter"></i>
+            <div ref="filter" @click="toggleFilterPanel" @mouseover="hoverFilterPanel" @mouseleave="leavingFilterPanel" id="icon">
+                <i class="fa fa-filter"></i>
                 <p>Filter</p>
                 <TooltipComponent v-if="!excludePlausibleCollection">
                     <template slot="hover-element">
@@ -40,23 +40,24 @@
             <QuitComponent v-on:quit="showForm=false"></QuitComponent>
 
             <div class="part">
-                <h3>Global</h3>
                 <div class="metadata">
-                    <i class="fas fa-wifi"></i>
+                    <i class="fa fa-wifi"></i>
                     <label>Bandwidth :</label>
 
-                    <multiselect v-model="regime"
+                    <multiselect 
+                        class="pickbox" 
+                        v-model="regime"
                         :options="bandwidthList"
                         :multiple="true"
                         :searchable="true"
                         :close-on-select="false"
                         :clear-on-select="false"
                         :preserve-search="true"
-                        placeholder="Pick/type one or several"></multiselect>
+                        placeholder="radio, infrared, optical..."></multiselect>
                 </div>
 
                 <div class="metadata">
-                    <i class="fas fa-calendar"></i>
+                    <i class="fa fa-calendar"></i>
                     <label>Date :</label>
 
                     <v-date-picker
@@ -77,7 +78,9 @@
                 </div>
 
                 <div class="metadata">
-                    <i class="fas fa-broadcast-tower"></i>
+                    <i style="width: 32px;"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg></i>
                     <label>Em :</label>
 
                     <vue-slider id="slider" ref="slider" v-model="em_value" @drag-end="changeEmValues($event.value)" v-bind="options" v-bind:width="'100%'"></vue-slider>
@@ -99,7 +102,7 @@
                 </div>
 
                 <div class="metadata">
-                    <i class="fas fa-image"></i>
+                    <i class="fa fa-image"></i>
                     <label>Type :</label>
 
                     <ul class="checkbox-container">
@@ -117,7 +120,7 @@
             <div class="part">
                 <h3>Catalogs only</h3>
                 <div class="metadata">                    
-                    <i class="fas fa-space-shuttle"></i>
+                    <i class="fa fa-space-shuttle"></i>
                     <label>Mission :</label>
 
                     <multiselect v-model="mission"
@@ -127,11 +130,13 @@
                         :close-on-select="false"
                         :clear-on-select="false"
                         :preserve-search="true"
-                        placeholder="Pick/type one or several"></multiselect>
+                        placeholder="Chandra, AKARI, ESO..."></multiselect>
                 </div>
 
                 <div class="metadata">
-                    <i class="fas fa-satellite"></i>
+                    <i style="width: 32px;"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+                    </svg></i>
                     <label>Astronomy :</label>
 
                     <multiselect v-model="astronomy"
@@ -141,7 +146,7 @@
                         :close-on-select="false"
                         :clear-on-select="false"
                         :preserve-search="true"
-                        placeholder="Pick/type one or several"></multiselect>
+                        placeholder="AGN, ..."></multiselect>
                 </div>
             </div>
         </div>
@@ -233,7 +238,7 @@ export default class FilterComponent extends Vue {
     private tags: Map<string, Tag[]> = new Map<string, Tag[]>();
 
     private showForm: boolean = false;
-
+    private showColor: string = 'white';
     /* TMIN/TMAX FILTERING */
     private minDate: Date = new Date(1970, 0, 1);
     private maxDate: Date = new Date();
@@ -424,6 +429,37 @@ export default class FilterComponent extends Vue {
             key: 't_min',
             tags: [tag_min],
         });
+    }
+
+    private toggleFilterPanel() {
+        this.showForm = !this.showForm;
+        if (this.showForm) {
+            this.showColor = 'gainsboro';
+
+        } else {
+            this.showColor = 'white';
+        }
+
+        this.$refs.filter['style'].backgroundColor = this.showColor;
+
+        // this.$el.backgroundColor = this.showColor;
+    }
+
+    private hoverFilterPanel() {
+        if (!this.showForm) {
+            this.$refs.filter['style'].backgroundColor = 'gainsboro';
+        }
+    }
+
+    private leavingFilterPanel() {
+        if (!this.showForm) {
+            this.$refs.filter['style'].backgroundColor = 'white';
+        }
+    }
+
+
+    private setHoverColor() {
+        this.showColor = 'gainsboro';
     }
 
     private addUpperBoundDateFilterTag(date: Date) {
@@ -704,10 +740,11 @@ $pos-y-lang: 20px;
 #filter #shower {
     border-top: 1px solid gainsboro;
 
+
     #icon {
         padding: 10px;
         flex: 1;
-
+        text-align: center;
         * {
             display: inline-block;
         }
@@ -717,14 +754,13 @@ $pos-y-lang: 20px;
         }
 
         p.num-datasets {
-            float: right;
             color: green;
         }
     }
 }
 
 #filter #icon:hover {
-    background-color: gainsboro;
+    //background-color: gainsboro;
     cursor: pointer;
 }
 
@@ -732,12 +768,10 @@ $pos-y-lang: 20px;
     position: absolute;
     left: 100%;
     top: 50%;
-    
     transform: translate($size-lang, -$size-lang) translateY(-$pos-y-lang);
 
     background-color: white;
-    border: 1px solid gray;
-    width: 450px;
+    width: 400px;
     padding: 0px 10px;
 }
 
@@ -758,7 +792,7 @@ $pos-y-lang: 20px;
 
 #filter #form .part {
     h3 {
-        padding: 5px 0px;
+        padding: 10px 0px;
         border-bottom: 2px solid gainsboro;
     }
 
@@ -767,13 +801,17 @@ $pos-y-lang: 20px;
     }
 
     .metadata {
-        height: 80px;
-        padding: 0px 10px;
+        //height: 80px;
+        padding: 7px 10px;
         display: flex;
 
         align-items: center;
 
         border-top: 1px solid gainsboro;
+
+        .pickbox {
+            min-height:20px;
+        }
 
         i {
             font-size: 20px;

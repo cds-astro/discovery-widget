@@ -1,7 +1,5 @@
 <template>
-<div>
   <PanelIconComponent></PanelIconComponent>
-</div>
 </template>
 
 <script lang="ts">
@@ -57,7 +55,7 @@ html {
 /* CSS for the scrollbar */
 @import './css/scrollbar.css';
 /* Font Awesome */
-@import url(//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css);
+@import url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css");
 
 </style>
 

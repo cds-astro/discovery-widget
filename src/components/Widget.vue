@@ -4,9 +4,9 @@
 <div id="widget-component" v-bind:style="{ top: offsetTop.toString() + 'px' }">
     <QuitComponent v-on:quit="$emit('quit')"></QuitComponent>
     <div id="widget-title">
-        <i v-if="!isLoading" class="fas fa-database"></i>
-        <i v-else class="fas fa-spinner fa-spin"></i>
-        <h3>Sky Data Discovery Tree</h3>
+        <i v-if="!isLoading" class="fa fa-database fa-lg"></i>
+        <i v-else class="fa fa-spinner fa-spin"></i>
+        <h3>Sky Discovery</h3>
     </div>
     <FilterComponent 
         :updatedTagsFromWidget="sendTagsToFilter"
@@ -735,16 +735,16 @@ export default class WidgetComponent extends Vue {
     display: flex;
     flex-direction: column;
 
-    width: 300px;
-    max-height: 70vh;
+    min-width: 290px;
+    width: 17vw;
+    max-height: 60vh;
 
-    position: absolute;
+    position: relative;
     top: 40px;
     left: 40px;
 
     background-color: white;
     color: black;
-    border: 1px solid gray;
 
     #wrap-path {
         padding: 2px;

@@ -99,7 +99,7 @@ export default class CollectionComponent extends Vue {
         this.$emit('toggle-popup', {
             header: table,
             offsetTop: element.getBoundingClientRect().top,
-            offsetHeight: this.$el.offsetHeight,
+            offsetHeight: this.$el['offsetHeight'],
             element,
         });
     }

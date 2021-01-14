@@ -35,7 +35,7 @@ export default class TooltipComponent extends Vue {
     color: black;
 
     border-radius: 2px;
-    padding: 10px;
+    padding: 2px;
 
     /* Position the tooltip */
     position: absolute;
@@ -44,13 +44,13 @@ export default class TooltipComponent extends Vue {
     left: 100%;
     top: 50%;
     transform: translate(0%, -50%);
-    margin-left: 5px;
+    //margin-left: 5px;
 
     border: 1px solid gainsboro;
     white-space: nowrap;
 
     ul {
-        padding: 0px 1em;
+        //padding: 0px 1em;
     }
     img {
         width: 100%;
