@@ -1,6 +1,6 @@
 {
   "name": "discovery-tree",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "homepage": "http://cdsportal.u-strasbg.fr/moctree/",
   "private": false,
   "unpkg": "dist/discovery-tree.umd.min.js",

@@ -3,8 +3,7 @@
 <template>
     <div id="panel-icon">
         <a id="open"
-            v-on:click="showCollectionTree = !showCollectionTree"
-            v-bind:style="{top: offsetTop.toString() + 'px'}">
+            v-on:click="showCollectionTree = !showCollectionTree">
             
             <i>
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -14,7 +13,7 @@
         </a>
         <WidgetComponent v-show="showCollectionTree"
             v-on:quit="showCollectionTree=false"
-            v-bind:offsetTop="offsetTop"></WidgetComponent>
+            v-bind:offsetTop="0"></WidgetComponent>
   </div>
 </template>
 
@@ -30,23 +29,19 @@ import WidgetComponent from './Widget.vue';
 })
 export default class PanelIconComponent extends Vue {
     private showCollectionTree: boolean = false;
-    private offsetTop: number = 100;
 }
 </script>
 
 <style>
 #panel-icon {
-    position: absolute;
-    z-index: 5;
-        top: 6px;
+    position: relative;
+    z-index: 100;
 }
 
 #open {
     position: absolute;
     width: 32px;
     height: 32px;
-    left: 4px;
-
 
     background: rgba(250,250,250,0.8);
     border-radius: 4px;
